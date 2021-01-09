@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Email de relance</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+ <body>
+ 	<h1 th:text="${societe}"></h1> 
+ 	<br />
+    <p>Bonjour M <span th:text="${abonne.nom} ?: ''"></span></p>
+
+    <p th:if="${#lists.size(abonne.prets) > 1}">
+    	Sauf erreur de notre part, vous n'avez pas encore rendu les 
+    	<span th:text="${#lists.size(abonne.prets)}"></span> emprunts suivants :
+   	</p>
+   	<p th:unless="${#lists.size(abonne.prets) > 1}">
+    	Sauf erreur de notre part, vous n'avez pas encore rendu l'emprunt suivant :
+   	</p>
+    <table border="1">
+    	<tr>
+    		<th>Ouvrage</th>
+    		<th>Pris le</th>
+    		<th>Retour prévu le</th>
+    		<th></th>
+    	</tr>
+    	<tr th:each="pret : ${abonne.prets}">
+            <td th:text="${pret.ouvrage.titre}"></td>
+            <td th:text="${#dates.format(pret.dateDebut, 'dd MMMM yyyy')}"></td>
+            <td th:text="${#dates.format(pret.dateFinPrevu, 'dd MMMM yyyy')}"></td>
+            <td th:if="${pret.prolongationsPossible > 0}">
+    	    	<a th:href="@{${notreSite}}">Prolonger l'emprunt</a></td>
+    		<td th:unless="${pret.prolongationsPossible > 0}">Retour immédiat de l'ouvrage</td>
+        </tr>
+    </table> 
+    	
+    <p>Pour toutes questions ou en cas de difficulté, vous pouvez nous contacter par email à cette adresse
+    	<a th:href="@{'mailto:' + ${email}}"><span th:text="${email}"></span></a>	
+    </p>
+    <p th:if="${#lists.size(abonne.prets) > 1}">
+    	Si vous avez déjà retourné ces ouvrages veuillez ne pas tenir compte de cet email.
+    </p>
+    <p th:unless="${#lists.size(abonne.prets) > 1}">
+    	Si vous avez déjà retourné cet ouvrage veuillez ne pas tenir compte de cet email.
+    </p>
+    <p>Cordialement<br /><br />
+      L'équipe des bibliothèques de Bouquinville
+    </p>
+  </body>
+</html>
