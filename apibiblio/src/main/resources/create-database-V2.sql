@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS `ouvrage` (
   `annee_edition` int(11) NOT NULL,
   `auteur` varchar(255) NOT NULL,
   `nbre_exemplaire` int(11) DEFAULT NULL,
+  `nbre_exemplaire_total` int(11) DEFAULT 0,
   `resume` varchar(255) DEFAULT NULL,
   `titre` varchar(255) NOT NULL,
   `theme_id` bigint(20) DEFAULT NULL,

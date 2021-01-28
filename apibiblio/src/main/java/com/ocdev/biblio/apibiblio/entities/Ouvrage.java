@@ -36,6 +36,8 @@ public class Ouvrage implements Serializable
 	private int anneeEdition;
 	@Column(nullable = true)
 	private int nbreExemplaire;
+	@Column(nullable = true)
+	private int nbreExemplaireTotal;
 	@ManyToOne
 	@JoinColumn(name = "theme_id")
 	private Theme theme;
@@ -112,6 +114,14 @@ public class Ouvrage implements Serializable
 	public void setNbreExemplaire(int nbreExemplaire)
 	{
 		this.nbreExemplaire = nbreExemplaire;
+	}
+
+	public int getNbreExemplaireTotal() {
+		return nbreExemplaireTotal;
+	}
+
+	public void setNbreExemplaireTotal(int nbreExemplaireTotal) {
+		this.nbreExemplaireTotal = nbreExemplaireTotal;
 	}
 
 	public Theme getTheme()
