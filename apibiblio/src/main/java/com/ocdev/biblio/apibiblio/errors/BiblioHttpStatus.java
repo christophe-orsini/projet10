@@ -20,6 +20,10 @@ public enum BiblioHttpStatus
 	 */
 	BIBLIO_NOT_ENOUGH (462, "Not enough items for this ressource"),
 	/**
+	 * Plus assez de place dans cette ressource pour pouvoir exécuter cette action.
+	 */
+	BIBLIO_NO_MORE (463, "No more place to add items for this ressource"),
+	/**
 	 * Une action n'est pas permise à cause des règles de gestion.
 	 */
 	BIBLIO_NOT_ALLOWED (469, "Action not allowed");
