@@ -22,4 +22,5 @@ public interface PretRepository extends JpaRepository<Pret, Long>
 	Optional<Pret> findByAbonneIdAndOuvrageIdAndStatutNot(Long abonneId, Long ouvrageId, Statut statut);
 	Page<Pret> findByAbonneIdAndStatutNotAndStatutNot(Long abonneId, Statut statut1, Statut Statut2, Pageable paging);
 	Collection<Pret> findByDateFinPrevuLessThan(Date dateMaxi);
+	Collection<Pret> findByAbonneIdAndOuvrageId(Long abonneId, Long ouvrageId);
 }
