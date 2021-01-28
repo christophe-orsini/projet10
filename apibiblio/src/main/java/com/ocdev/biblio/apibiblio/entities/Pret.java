@@ -26,6 +26,17 @@ public class Pret implements Serializable
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date dateHeureReservation;
+	
+	@Column(nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date dateHeureExpiration;
+	
+	@Column(nullable = true)
+	private boolean emailEnvoye;
+	
 	@Column(nullable = false)
 	@Temporal(TemporalType.DATE)
 	private Date dateDebut;
@@ -77,6 +88,30 @@ public class Pret implements Serializable
 	public void setId(Long id)
 	{
 		this.id = id;
+	}
+
+	public Date getDateHeureReservation() {
+		return dateHeureReservation;
+	}
+
+	public void setDateHeureReservation(Date dateHeureReservation) {
+		this.dateHeureReservation = dateHeureReservation;
+	}
+
+	public Date getDateHeureExpiration() {
+		return dateHeureExpiration;
+	}
+
+	public void setDateHeureExpiration(Date dateHeureExpiration) {
+		this.dateHeureExpiration = dateHeureExpiration;
+	}
+
+	public boolean isEmailEnvoye() {
+		return emailEnvoye;
+	}
+
+	public void setEmailEnvoye(boolean emailEnvoye) {
+		this.emailEnvoye = emailEnvoye;
 	}
 
 	public Date getDateDebut()
@@ -165,5 +200,4 @@ public class Pret implements Serializable
 		return "Pret [dateDebut=" + dateDebut + ", dateFinPrevu=" + dateFinPrevu + ", statut=" + statut + ", abonne="
 				+ abonne + ", ouvrage=" + ouvrage + "]";
 	}
-
 }
