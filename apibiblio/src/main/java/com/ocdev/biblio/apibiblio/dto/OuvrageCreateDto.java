@@ -21,9 +21,9 @@ public class OuvrageCreateDto implements Serializable
 	@ApiModelProperty(position = 4, required = true, value = "Année de parution de l'ouvrage")
 	@Positive(message="L'année de parution est obligatoire")
 	private int anneeEdition;
-	@ApiModelProperty(position = 5, required = false, value = "Nombre d'exemplaires disponibles pour prêt")
+	@ApiModelProperty(position = 5, required = false, value = "Nombre d'exemplaires total disponibles pour prêt")
 	@PositiveOrZero(message = "Le nombre d'exemplaires ne peut pas être négatif")
-	private int nbreExemplaire;
+	private int nbreExemplaireTotal;
 	@ApiModelProperty(position = 6, required = true, value = "Thème (catégorie) de l'ouvrage")
 	@Positive(message="Le thème est obligatoire")
 	private Long theme;
@@ -60,13 +60,13 @@ public class OuvrageCreateDto implements Serializable
 	{
 		this.anneeEdition = anneeEdition;
 	}
-	public int getNbreExemplaire()
+	public int getNbreExemplaireTotal()
 	{
-		return nbreExemplaire;
+		return nbreExemplaireTotal;
 	}
-	public void setNbreExemplaire(int nbreExemplaire)
+	public void setNbreExemplaireTotal(int nbreExemplaireTotal)
 	{
-		this.nbreExemplaire = nbreExemplaire;
+		this.nbreExemplaireTotal = nbreExemplaireTotal;
 	}
 	public Long getTheme()
 	{

@@ -53,7 +53,7 @@ public class OuvrageCreateDtoConverter implements IDtoConverter<Ouvrage, Ouvrage
 			}
 		}
 		ouvrage.setTheme(theme);
-		ouvrage.setNbreExemplaire(ouvrageCreateDto.getNbreExemplaire());
+		ouvrage.setNbreExemplaireTotal(ouvrageCreateDto.getNbreExemplaireTotal());
 		
 		return ouvrage;
 	}
