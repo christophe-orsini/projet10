@@ -16,6 +16,7 @@ public class Ouvrage implements Serializable
 	private String auteur;
 	private int anneeEdition;
 	private int nbreExemplaire;
+	private int nbreExemplaireTotal;
 	private Theme theme;
 	
 	public Ouvrage(){}
@@ -87,6 +88,15 @@ public class Ouvrage implements Serializable
 	public void setNbreExemplaire(int nbreExemplaire)
 	{
 		this.nbreExemplaire = nbreExemplaire;
+	}
+
+	
+	public int getNbreExemplaireTotal() {
+		return nbreExemplaireTotal;
+	}
+
+	public void setNbreExemplaireTotal(int nbreExemplaireTotal) {
+		this.nbreExemplaireTotal = nbreExemplaireTotal;
 	}
 
 	public Theme getTheme()
