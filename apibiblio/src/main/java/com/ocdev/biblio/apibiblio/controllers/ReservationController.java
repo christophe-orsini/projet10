@@ -14,6 +14,7 @@ import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
 import com.ocdev.biblio.apibiblio.errors.FullWaintingQueueException;
+import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 import com.ocdev.biblio.apibiblio.errors.NotEnoughCopiesException;
 import com.ocdev.biblio.apibiblio.services.PretService;
 import io.swagger.annotations.ApiOperation;
@@ -33,7 +34,7 @@ public class ReservationController
 			@ApiResponse(code = 201, message = "La réservation est enregistrée"),
 			@ApiResponse(code = 403, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "L'abonné et/ou l'ouvrage n'existe pas"),
-			@ApiResponse(code = 460, message = "Un prêt en cours existe déjà pour cet ouvrage et cet abonné"),
+			@ApiResponse(code = 460, message = "Réservation impossible car une prêt en cours existe déjà pour cet ouvrage et cet abonné"),
 			@ApiResponse(code = 462, message = "Pas assez d'exemplaires pour la réservation de cet ouvrage"),
 			@ApiResponse(code = 463, message = "Nombre maximum de réservation atteint pour cet ouvrage")
 			})
@@ -44,5 +45,21 @@ public class ReservationController
 	{
 		Pret result = pretService.reserver(abonneId, ouvrageId);
 		return new ResponseEntity<Pret>(result, HttpStatus.CREATED);
+	}
+	
+	@ApiOperation(value = "Annulation d'une réservation", notes = "Annulation d'une réservation")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "L'annulationde la réservation est enregistrée"),
+			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 404, message = "La réservation n'existe pas"),
+			@ApiResponse(code = 469, message = "Seul la personne qui a réservé ou un employé peuvent annuler une réservation")
+			})
+	@PutMapping(value ="/reservations/annuler/{reservationId}/utilisateur/{utilisateurId}", produces = "application/json")
+	public ResponseEntity<?> annulationReservation(@ApiParam(value = "ID de la réservation", required = true, example = "1")
+		@PathVariable @Min(1) final Long reservationId, @ApiParam(value = "ID du demandeur", required = true, example = "1")
+		@PathVariable @Min(1) final Long utilisateurId) throws EntityNotFoundException, NotAllowedException
+	{
+		pretService.annulerReservation(reservationId, utilisateurId);
+		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 }

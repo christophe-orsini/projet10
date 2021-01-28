@@ -205,6 +205,35 @@ public class PretServiceImpl implements PretService
 		// creation du pret
 		return pretRepository.save(pret);
 	}
+	
+	@Override
+	@Transactional
+	public void annulerReservation(Long reservationId, Long utilisateurId) throws EntityNotFoundException, NotAllowedException
+	{
+		Optional<Pret> reservation = pretRepository.findById(reservationId);
+		if (!reservation.isPresent()) throw new EntityNotFoundException("La réservation n'existe pas");
+		
+		// verifier si la réservation est toujours en cours
+		if (!reservation.get().getStatut().isReserve()) throw new EntityNotFoundException("La réservation n'existe pas");;
+		
+		// verifier si le demandeur existe
+		Optional<Utilisateur> demandeur = utilisateurRepository.findById(utilisateurId);
+		if (!demandeur.isPresent()) throw new EntityNotFoundException("Le demandeur n'existe pas");
+		
+		// verifier si le demandeur est l'emprunteur ou un employé
+		Utilisateur emprunteur = reservation.get().getAbonne();
+		if (demandeur.get().getRole() == Role.ROLE_ABONNE && demandeur.get().getId() != emprunteur.getId())
+			throw new NotAllowedException("Vous ne pouvez pas annuler cette réservation. Vous n'etes pas le demandeur");
+				
+		// set date d'annulation
+		reservation.get().setDateHeureReservation(new Date());
+		// changer statut
+		reservation.get().setStatut(Statut.ANNULEE);
+		// sauvegarder
+		pretRepository.save(reservation.get());
+	}
+	
+	// ************************************************************* private methods
 
 	private boolean pretOrReservationExists(Long abonneId, Long ouvrageId)
 	{
