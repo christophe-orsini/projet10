@@ -9,22 +9,24 @@ import com.ocdev.biblio.apibiblio.utils.Tools;
 */
 public enum Statut
 {
-	INCONNU ("Inconnu", false),
-	RESERVE ("Réservé", false),
-	DISPONIBLE ("Disponible", false),
-	EN_COURS ("En cours", true),
-	PROLONGE ("Prolongé", true),
-	RETARD ("En retard", true),
-	RETOURNE ("Retourné", false),
-	ANNULEE ("Annulée", false);
+	INCONNU ("Inconnu", false, false),
+	RESERVE ("Réservé", false, true),
+	DISPONIBLE ("Disponible", false, true),
+	EN_COURS ("En cours", true, false),
+	PROLONGE ("Prolongé", true, false),
+	RETARD ("En retard", true, false),
+	RETOURNE ("Retourné", false, false),
+	ANNULEE ("Annulée", false, false);
 	
 	private String libelle;
 	private boolean enPret;
+	private boolean reserve;
 	
-	Statut(String libelle, boolean enPret)
+	Statut(String libelle, boolean enPret, boolean reserve)
 	{
 		this.libelle = libelle;
 		this.enPret = enPret;
+		this.reserve = reserve;
 	}
 
 	public String getLibelle()
@@ -45,6 +47,14 @@ public enum Statut
 	public void setEnPret(boolean enPret)
 	{
 		this.enPret = enPret;
+	}
+
+	public boolean isReserve() {
+		return reserve;
+	}
+
+	public void setReserve(boolean reserve) {
+		this.reserve = reserve;
 	}
 
 	@Override
