@@ -37,11 +37,11 @@ public class Pret implements Serializable
 	@Column(nullable = true)
 	private boolean emailEnvoye;
 	
-	@Column(nullable = false)
+	@Column(nullable = true)
 	@Temporal(TemporalType.DATE)
 	private Date dateDebut;
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	@Temporal(TemporalType.DATE)
 	private Date dateFinPrevu;
 

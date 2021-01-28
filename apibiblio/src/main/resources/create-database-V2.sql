@@ -36,11 +36,11 @@ CREATE TABLE IF NOT EXISTS `utilisateur` (
 
 CREATE TABLE IF NOT EXISTS `pret` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `date_heure_reservation` datetime,
-  `date_heure_expiration` datetime,
-  `email_envoye` tinyint(1),
-  `date_debut` date NOT NULL,
-  `date_fin_prevu` date NOT NULL,
+  `date_heure_reservation` datetime DEFAULT NULL,
+  `date_heure_expiration` datetime DEFAULT NULL,
+  `email_envoye` tinyint(1) DEFAULT 0,
+  `date_debut` date DEFAULT NULL,
+  `date_fin_prevu` date DEFAULT NULL,
   `date_retour` date DEFAULT NULL,
   `periodes` int(11) DEFAULT NULL,
   `prolongations_possible` int(11) DEFAULT NULL,
