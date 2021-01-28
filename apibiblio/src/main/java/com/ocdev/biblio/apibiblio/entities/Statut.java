@@ -11,10 +11,12 @@ public enum Statut
 {
 	INCONNU ("Inconnu"),
 	RESERVE ("Réservé"),
+	DISPONIBLE ("Disponible"),
 	EN_COURS ("En cours"),
 	PROLONGE ("Prolongé"),
 	RETARD ("En retard"),
-	RETOURNE ("Retourné");
+	RETOURNE ("Retourné"),
+	ANNULEE ("Annulée");
 	
 	private String libelle;
 	
@@ -46,10 +48,12 @@ public enum Statut
 		switch(statut)
 		{
 			case "Réservé": return RESERVE;
+			case "Disponible": return DISPONIBLE;
 			case "En cours": return EN_COURS;
 			case "Prolongé": return PROLONGE;
 			case "En retard": return RETARD;
 			case "Retourné": return RETOURNE;
+			case "Annulée": return ANNULEE;
 			default:return INCONNU;
 		}
 	}
