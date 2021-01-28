@@ -3,26 +3,28 @@ package com.ocdev.biblio.apibiblio.entities;
 import com.ocdev.biblio.apibiblio.utils.Tools;
 
 /**
-* Enum pour le statut d'un prêt.
+* Enum pour le statut d'un prêt ou d'une réservation de prêt.
 * @author C.Orsini
 *
 */
 public enum Statut
 {
-	INCONNU ("Inconnu"),
-	RESERVE ("Réservé"),
-	DISPONIBLE ("Disponible"),
-	EN_COURS ("En cours"),
-	PROLONGE ("Prolongé"),
-	RETARD ("En retard"),
-	RETOURNE ("Retourné"),
-	ANNULEE ("Annulée");
+	INCONNU ("Inconnu", false),
+	RESERVE ("Réservé", false),
+	DISPONIBLE ("Disponible", false),
+	EN_COURS ("En cours", true),
+	PROLONGE ("Prolongé", true),
+	RETARD ("En retard", true),
+	RETOURNE ("Retourné", false),
+	ANNULEE ("Annulée", false);
 	
 	private String libelle;
+	private boolean enPret;
 	
-	Statut(String libelle)
+	Statut(String libelle, boolean enPret)
 	{
 		this.libelle = libelle;
+		this.enPret = enPret;
 	}
 
 	public String getLibelle()
@@ -35,6 +37,16 @@ public enum Statut
 		this.libelle = libelle;
 	}
 	
+	public boolean isEnPret()
+	{
+		return enPret;
+	}
+
+	public void setEnPret(boolean enPret)
+	{
+		this.enPret = enPret;
+	}
+
 	@Override
 	public String toString()
 	{
