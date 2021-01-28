@@ -22,6 +22,7 @@ import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.DelayLoanException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
+import com.ocdev.biblio.apibiblio.errors.FullWaintingQueueException;
 import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 import com.ocdev.biblio.apibiblio.errors.NotEnoughCopiesException;
 import com.ocdev.biblio.apibiblio.utils.AppSettings;
@@ -167,5 +168,65 @@ public class PretServiceImpl implements PretService
 			dateMaxi = new Date();
 		}
 		return pretRepository.findByDateFinPrevuLessThan(dateMaxi);
+	}
+	
+	@Override
+	@Transactional
+	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaintingQueueException
+	{
+		// verfifier si l'abonné existe
+		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
+		if (!abonne.isPresent()) throw new EntityNotFoundException("L'abonné n'existe pas");
+				
+		// verfifier si l'ouvrage existe
+		Optional<Ouvrage> ouvrage = ouvrageRepository.findById(ouvrageId);
+		if (!ouvrage.isPresent()) throw new EntityNotFoundException("L'ouvrage n'existe pas");
+		
+		// recherche si un pret en cours ou une réservation existe deja
+		if (pretOrReservationExists(abonneId, ouvrageId)) throw new AlreadyExistsException("Un prêt en cours ou une réservation existe déjà pour cet abonné et cet ouvrage");
+		
+		// verifier qu'il existe au moins un exemplaire pour l'ouvrage
+		if (ouvrage.get().getNbreExemplaireTotal() < 1) throw new NotEnoughCopiesException("Pas assez d'exemplaires pour le prêt de cet ouvrage");
+		
+		// verifier que la file d'attente n'est pas pleine
+		int nbreReservation = nbreReserve(ouvrageId);
+		int nbreMaxiReservation = ouvrage.get().getNbreExemplaireTotal() * AppSettings.getIntSetting("reservation.multiple");
+		if (nbreReservation >= nbreMaxiReservation)throw new FullWaintingQueueException("Nombre de réservation maximale atteinte pour cet ouvrage car ");
+		
+		// initialisation du pret
+		Pret pret = new Pret(abonne.get(), ouvrage.get());
+		
+		Calendar c = Calendar.getInstance();
+		c.setTime(new Date());
+		pret.setDateHeureReservation(c.getTime());
+		
+		pret.setStatut(Statut.RESERVE);
+		
+		// creation du pret
+		return pretRepository.save(pret);
+	}
+
+	private boolean pretOrReservationExists(Long abonneId, Long ouvrageId)
+	{
+		// recherche si un pret en cours existe deja
+		Collection<Pret>pretsExist = pretRepository.findByAbonneIdAndOuvrageId(abonneId, ouvrageId);
+		for (Pret pret : pretsExist)
+		{
+			if (pret.getStatut().isEnPret()) return true;
+			if (pret.getStatut().isReserve()) return true;
+		}
+		return false;
+	}
+	
+	private int nbreReserve(Long ouvrageId)
+	{
+		int total = 0;
+		// recherche le nombre de réservation pour un ouvrage
+		Collection<Pret>reservationExist = pretRepository.findByOuvrageId(ouvrageId);
+		for (Pret reservation : reservationExist)
+		{
+			if (reservation.getStatut().isReserve()) total++;
+		}
+		return total;
 	}
 }

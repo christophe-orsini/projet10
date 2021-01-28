@@ -9,11 +9,12 @@ import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.DelayLoanException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
+import com.ocdev.biblio.apibiblio.errors.FullWaintingQueueException;
 import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 import com.ocdev.biblio.apibiblio.errors.NotEnoughCopiesException;
 
 /**
- * Interface de déclaration des services pour les ouvrages
+ * Interface de déclaration des services pour les prets
  * @author C.Orsini
  */
 public interface PretService
@@ -62,10 +63,21 @@ public interface PretService
 	 */
 	public Pret consulter(Long pretId) throws EntityNotFoundException;
 	/**
-	 * Retourne la liste des prêts en reatrd.
+	 * Retourne la liste des prêts en retard.
 	 * Compare la date en argument avec la date de fin prévu
 	 * @param dateMaxi La date maximale de comparaison
 	 * @return La liste des prêts avec une date de fin prévue supérieure à la date en argument
 	 */
 	public Collection<Pret> pretsEnRetard(Date dateMaxi);
+	/**
+	 * Réservation d'un ouvrage non disponible
+	 * @param abonneId L'ID de l'abonné
+	 * @param ouvrageId L'ID de l'ouvrage
+	 * @return Le prêt avec le statut "Reservé"
+	 * @throws AlreadyExistsException levée si un prêt en cours (ou une réservation) existe déjà pour cet ouvrage et cet abonné
+	 * @throws EntityNotFoundException levée si l'ouvrage ou l'abonné n'existent pas
+	 * @throws NotEnoughCopiesException levée s'il n'y a pas d'exemplaires pour cet ouvrage
+	 * @throws FullWaintingQueueException levée s'il la file de demande de réservation pour cet ouvrage est pleine
+	 */
+	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaintingQueueException;
 }
