@@ -1,7 +1,6 @@
 package com.ocdev.biblio.webapp.services;
 
 import java.security.Principal;
-
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.ocdev.biblio.webapp.dto.ReservationDto;
 import com.ocdev.biblio.webapp.objects.Pret;
 import com.ocdev.biblio.webapp.objects.Utilisateur;
 import com.ocdev.biblio.webapp.utils.RestResponsePage;
@@ -72,5 +72,21 @@ public class PretServiceImpl implements PretService
 		}
 		
 		return utilisateur.getId();
+	}
+	
+	public Page<ReservationDto> listeReservations(Principal abonne, int page, int taille) throws EntityNotFoundException
+	{
+		RestTemplate restTemplate = restTemplateService.buildRestTemplate();
+		
+		// recherche de l'abonné
+		Long abonneId = getAbonneId(abonne);
+	 	
+		ParameterizedTypeReference<RestResponsePage<ReservationDto>> responseType = 
+				new ParameterizedTypeReference<RestResponsePage<ReservationDto>>() { };
+		
+		ResponseEntity<RestResponsePage<ReservationDto>> result = restTemplate.exchange(
+				properties.getApiUrl() + "reservations/" + abonneId, HttpMethod.GET, null, responseType);
+		
+		return result.getBody();
 	}
 }
