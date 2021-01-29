@@ -48,7 +48,7 @@ public class PretServiceImpl implements PretService
 		if (!ouvrage.isPresent()) throw new EntityNotFoundException("L'ouvrage n'existe pas");
 		
 		// recherche si un pret en cours existe deja
-		Optional<Pret> pretExists = pretRepository.findByAbonneIdAndOuvrageIdAndStatutNot(abonneId, ouvrageId, Statut.RETOURNE);
+		Optional<Pret> pretExists = pretRepository.findByAbonneIdAndOuvrageIdAndEnPret(abonneId, ouvrageId);
 		if (pretExists.isPresent()) throw new AlreadyExistsException("Un prêt en cours existe déjà pour cet abonné et cet ouvrage");		
 			
 		// verifier s'il y a assez d'exemplaires d'ouvrage
@@ -87,7 +87,7 @@ public class PretServiceImpl implements PretService
 		if (!pret.isPresent()) throw new EntityNotFoundException("Le prêt n'existe pas");
 		
 		// verifier si le pret n'est pas déja retourné
-		if (pret.get().getStatut() == Statut.RETOURNE) return;
+		if (pret.get().getStatut() == Statut.RETOURNE) throw new EntityNotFoundException("Le prêt n'existe pas");
 		
 		// verifier si le demandeur existe
 		Optional<Utilisateur> demandeur = utilisateurRepository.findById(utilisateurId);
@@ -148,7 +148,7 @@ public class PretServiceImpl implements PretService
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
 		if (!abonne.isPresent()) throw new EntityNotFoundException("L'abonné n'existe pas");
 		
-		return pretRepository.findByAbonneIdAndStatutNotAndStatutNot(abonneId, Statut.INCONNU, Statut.RETOURNE, paging);
+		return pretRepository.findAllPretsByAbonneId(abonneId, paging);
 	}
 
 	@Override
@@ -182,14 +182,19 @@ public class PretServiceImpl implements PretService
 		Optional<Ouvrage> ouvrage = ouvrageRepository.findById(ouvrageId);
 		if (!ouvrage.isPresent()) throw new EntityNotFoundException("L'ouvrage n'existe pas");
 		
+		// recherche si un pret en cours existe deja
+		Optional<Pret> pretExists = pretRepository.findByAbonneIdAndOuvrageIdAndEnPret(abonneId, ouvrageId);
+		if (pretExists.isPresent()) throw new AlreadyExistsException("Un prêt est en cours pour cet abonné et cet ouvrage");
+		
 		// recherche si un pret en cours ou une réservation existe deja
-		if (pretOrReservationExists(abonneId, ouvrageId)) throw new AlreadyExistsException("Un prêt en cours ou une réservation existe déjà pour cet abonné et cet ouvrage");
+		Optional<Pret> reservationExists = pretRepository.findByAbonneIdAndOuvrageIdAndReserve(abonneId, ouvrageId);
+		if (reservationExists.isPresent()) throw new AlreadyExistsException("Une réservation existe déjà pour cet abonné et cet ouvrage");		
 		
 		// verifier qu'il existe au moins un exemplaire pour l'ouvrage
 		if (ouvrage.get().getNbreExemplaireTotal() < 1) throw new NotEnoughCopiesException("Pas assez d'exemplaires pour le prêt de cet ouvrage");
 		
 		// verifier que la file d'attente n'est pas pleine
-		int nbreReservation = nbreReserve(ouvrageId);
+		int nbreReservation = pretRepository.findAllReservationsByOuvrageId(ouvrageId).size();
 		int nbreMaxiReservation = ouvrage.get().getNbreExemplaireTotal() * AppSettings.getIntSetting("reservation.multiple");
 		if (nbreReservation >= nbreMaxiReservation)throw new FullWaitingQueueException("Nombre de réservation maximale atteinte pour cet ouvrage car ");
 		
@@ -233,29 +238,6 @@ public class PretServiceImpl implements PretService
 		pretRepository.save(reservation.get());
 	}
 	
-	// ************************************************************* private methods
-
-	private boolean pretOrReservationExists(Long abonneId, Long ouvrageId)
 	{
-		// recherche si un pret en cours existe deja
-		Collection<Pret>pretsExist = pretRepository.findByAbonneIdAndOuvrageId(abonneId, ouvrageId);
-		for (Pret pret : pretsExist)
-		{
-			if (pret.getStatut().isEnPret()) return true;
-			if (pret.getStatut().isReserve()) return true;
-		}
-		return false;
-	}
-	
-	private int nbreReserve(Long ouvrageId)
-	{
-		int total = 0;
-		// recherche le nombre de réservation pour un ouvrage
-		Collection<Pret>reservationExist = pretRepository.findByOuvrageId(ouvrageId);
-		for (Pret reservation : reservationExist)
-		{
-			if (reservation.getStatut().isReserve()) total++;
-		}
-		return total;
 	}
 }

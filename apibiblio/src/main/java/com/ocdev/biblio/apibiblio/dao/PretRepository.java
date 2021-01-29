@@ -6,9 +6,9 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import com.ocdev.biblio.apibiblio.entities.Pret;
-import com.ocdev.biblio.apibiblio.entities.Statut;
 
 /**
  * Interface d'accès au données de la classe {@link com.ocdev.biblio.apibiblio.entities.Pret}.
@@ -19,9 +19,20 @@ import com.ocdev.biblio.apibiblio.entities.Statut;
 @Repository
 public interface PretRepository extends JpaRepository<Pret, Long>
 {
-	Optional<Pret> findByAbonneIdAndOuvrageIdAndStatutNot(Long abonneId, Long ouvrageId, Statut statut);
-	Page<Pret> findByAbonneIdAndStatutNotAndStatutNot(Long abonneId, Statut statut1, Statut Statut2, Pageable paging);
+	@Query(value = "SELECT p FROM Pret p WHERE abonne_id = ?1 AND ouvrage_id = ?2 AND (statut = 'EN_COURS' OR statut = 'PROLONGE' OR statut = 'RETARD')")
+	Optional<Pret> findByAbonneIdAndOuvrageIdAndEnPret(Long abonneId, Long ouvrageId);
+	
+	@Query(value = "SELECT p FROM Pret p WHERE abonne_id = ?1 AND ouvrage_id = ?2 AND (statut = 'RESERVE' OR statut = 'DISPONIBLE')")
+	Optional<Pret> findByAbonneIdAndOuvrageIdAndReserve(Long abonneId, Long ouvrageId);	
+	
+	@Query(value = "SELECT p FROM Pret p WHERE abonne_id = ?1 AND (statut = 'EN_COURS' OR statut = 'PROLONGE' OR statut = 'RETARD')")
+	Page<Pret> findAllPretsByAbonneId(Long abonneId, Pageable paging);
+	
 	Collection<Pret> findByDateFinPrevuLessThan(Date dateMaxi);
-	Collection<Pret> findByAbonneIdAndOuvrageId(Long abonneId, Long ouvrageId);
-	Collection<Pret> findByOuvrageId(Long ouvrageId);
+	
+	@Query(value = "SELECT p FROM Pret p WHERE ouvrage_id = ?1 AND (statut = 'RESERVE' OR statut = 'DISPONIBLE')")
+	Collection<Pret> findAllReservationsByOuvrageId(Long ouvrageId);
+
+	@Query(value = "SELECT p FROM Pret p WHERE abonne_id = ?1 AND (statut = 'RESERVE' OR statut = 'DISPONIBLE')")
+	Page<Pret> findAllReservationsByAbonneId(Long abonneId, Pageable paging);
 }
