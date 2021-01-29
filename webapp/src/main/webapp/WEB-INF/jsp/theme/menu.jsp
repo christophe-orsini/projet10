@@ -17,6 +17,7 @@
 		<sec:authorize access="isAuthenticated()">
 			<a class="nav-link" href="/abonne/listeOuvrages">Liste des ouvrages</a>		
 			<a class="nav-link" href="/abonne/listePrets">Vos prêts en cours</a>
+			<a class="nav-link" href="/abonne/listeReservations">Vos réservations en cours</a>
 			<a class="nav-link ml-auto" href="/logout">Se déconnecter</a>
 		</sec:authorize>
 	</div>
