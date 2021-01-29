@@ -47,7 +47,7 @@ public class UtilisateurController
 			})
 	@GetMapping(value = "/utilisateurs/{email}", produces = "application/json")
 	public ResponseEntity<Utilisateur> chercheUtilisateur(
-			@ApiParam(value="Email (login) de l'utilisateur", required = true, example = "1")
+			@ApiParam(value="Email (login) de l'utilisateur", required = true, example = "email@domain.tld")
 			@PathVariable @Email final String email) throws EntityNotFoundException
 	{
 		Utilisateur utilisateur = utilisateurService.obtenir(email);
