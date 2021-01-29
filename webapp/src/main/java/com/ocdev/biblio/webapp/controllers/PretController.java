@@ -43,4 +43,12 @@ public class PretController
 		
 		return "/pret/listeReservations";
 	}
+	
+	@GetMapping("/abonne/annulerReservation/{id}")
+	public String annulerReservation(@PathVariable Long id, Model model, Principal utilisateur)
+	{
+		pretService.annulerReservation(utilisateur, id);
+				
+		return "redirect:/abonne/listeReservations";
+	}
 }

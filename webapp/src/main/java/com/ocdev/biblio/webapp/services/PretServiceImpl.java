@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -89,4 +90,21 @@ public class PretServiceImpl implements PretService
 		
 		return result.getBody();
 	}
+
+	@Override
+	public HttpStatus annulerReservation(Principal abonne, Long reservationId) throws EntityNotFoundException
+	{
+		RestTemplate restTemplate = restTemplateService.buildRestTemplate();
+		
+		// recherche de l'abonné
+		Long abonneId = getAbonneId(abonne);
+		
+		ResponseEntity<Pret> result = restTemplate.exchange(
+				properties.getApiUrl() + "reservations/annuler/" + reservationId + "/utilisateur/" + abonneId,
+				HttpMethod.PUT, null, Pret.class);
+		
+		return result.getStatusCode();
+	}
+	
+	
 }
