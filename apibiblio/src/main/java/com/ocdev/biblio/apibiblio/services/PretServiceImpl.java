@@ -238,6 +238,13 @@ public class PretServiceImpl implements PretService
 		pretRepository.save(reservation.get());
 	}
 	
+	@Override
+	public Page<Pret> listerSesReservations(Long abonneId, Pageable paging) throws EntityNotFoundException
 	{
+		// verifier si l'abonné existe
+		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
+		if (!abonne.isPresent()) throw new EntityNotFoundException("L'abonné n'existe pas");
+		
+		return pretRepository.findAllReservationsByAbonneId(abonneId, paging);
 	}
 }

@@ -88,4 +88,12 @@ public interface PretService
 	 * @throws NotAllowedException levée si la demande ne vient pas de la personne qui a réservé ou d'un employé
 	 */
 	public void annulerReservation(Long reservationId, Long utilisateurId) throws EntityNotFoundException, NotAllowedException;
+	/**
+	 * Retoune la liste des réservations d'un abonné
+	 * @param abonneId L'ID de l'abonné
+	 * @param paging Pagination
+	 * @return La liste des réservations qui peut être vide
+	 * @throws EntityNotFoundException levée si l'abonné n'existe pas
+	 */
+	public Page<Pret> listerSesReservations(Long abonneId, Pageable paging) throws EntityNotFoundException;
 }
