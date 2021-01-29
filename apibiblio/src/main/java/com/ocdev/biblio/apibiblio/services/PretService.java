@@ -5,6 +5,8 @@ import java.util.Date;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import com.ocdev.biblio.apibiblio.dto.ReservationDto;
 import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.DelayLoanException;
@@ -91,9 +93,8 @@ public interface PretService
 	/**
 	 * Retoune la liste des réservations d'un abonné
 	 * @param abonneId L'ID de l'abonné
-	 * @param paging Pagination
 	 * @return La liste des réservations qui peut être vide
 	 * @throws EntityNotFoundException levée si l'abonné n'existe pas
 	 */
-	public Page<Pret> listerSesReservations(Long abonneId, Pageable paging) throws EntityNotFoundException;
+	public Collection<ReservationDto> listerReservationsAbonne(Long abonneId) throws EntityNotFoundException;
 }

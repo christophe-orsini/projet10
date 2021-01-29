@@ -1,8 +1,10 @@
 package com.ocdev.biblio.apibiblio.services;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +16,7 @@ import com.ocdev.biblio.apibiblio.dao.OuvrageRepository;
 import com.ocdev.biblio.apibiblio.dao.PretRepository;
 import com.ocdev.biblio.apibiblio.dao.UtilisateurRepository;
 import com.ocdev.biblio.apibiblio.dto.PretDto;
+import com.ocdev.biblio.apibiblio.dto.ReservationDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.entities.Role;
@@ -34,6 +37,7 @@ public class PretServiceImpl implements PretService
 	@Autowired OuvrageRepository ouvrageRepository;
 	@Autowired UtilisateurRepository utilisateurRepository;
 	@Autowired IDtoConverter<Pret, PretDto> pretConverter;
+	@Autowired private IDtoConverter<Pret, ReservationDto> reservationConverter;
 	
 	@Override
 	@Transactional
@@ -239,12 +243,36 @@ public class PretServiceImpl implements PretService
 	}
 	
 	@Override
-	public Page<Pret> listerSesReservations(Long abonneId, Pageable paging) throws EntityNotFoundException
+	public Collection<ReservationDto> listerReservationsAbonne(Long abonneId) throws EntityNotFoundException
 	{
 		// verifier si l'abonné existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
 		if (!abonne.isPresent()) throw new EntityNotFoundException("L'abonné n'existe pas");
 		
-		return pretRepository.findAllReservationsByAbonneId(abonneId, paging);
+		Collection<ReservationDto> results = new ArrayList<ReservationDto>();
+		
+		Collection<Pret> reservations = pretRepository.findAllReservationsByAbonneId(abonneId);
+		for (Pret reservation : reservations)
+		{
+			List<Pret> ouvragesReserves = (List<Pret>) pretRepository.findAllReservationsByOuvrageId(reservation.getOuvrage().getId());
+			int rang = ouvragesReserves.indexOf(reservation);
+						
+			Pret prochainRetour = pretRepository.findFirstPretByOuvrageId(reservation.getOuvrage().getId());
+			
+			ReservationDto reservationDto = reservationConverter.convertEntityToDto(reservation);
+			reservationDto.setRang(++rang);
+			if (prochainRetour != null)
+			{
+				reservationDto.setDateDisponible(prochainRetour.getDateFinPrevu());
+			}
+			else
+			{
+				reservationDto.setDateDisponible(new Date());
+			}
+			
+			results.add(reservationDto);
+		}
+		
+		return results;
 	}
 }
