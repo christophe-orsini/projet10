@@ -9,7 +9,7 @@ import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.DelayLoanException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
-import com.ocdev.biblio.apibiblio.errors.FullWaintingQueueException;
+import com.ocdev.biblio.apibiblio.errors.FullWaitingQueueException;
 import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 import com.ocdev.biblio.apibiblio.errors.NotEnoughCopiesException;
 
@@ -77,9 +77,9 @@ public interface PretService
 	 * @throws AlreadyExistsException levée si un prêt en cours (ou une réservation) existe déjà pour cet ouvrage et cet abonné
 	 * @throws EntityNotFoundException levée si l'ouvrage ou l'abonné n'existent pas
 	 * @throws NotEnoughCopiesException levée s'il n'y a pas d'exemplaires pour cet ouvrage
-	 * @throws FullWaintingQueueException levée s'il la file de demande de réservation pour cet ouvrage est pleine
+	 * @throws FullWaitingQueueException levée s'il la file de demande de réservation pour cet ouvrage est pleine
 	 */
-	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaintingQueueException;
+	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException;
 	/**
 	 * Annulation d'une réservation.
 	 * @param reservationId L'ID de la réservation

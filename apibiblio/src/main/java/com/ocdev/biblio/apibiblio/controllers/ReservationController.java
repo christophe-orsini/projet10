@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
-import com.ocdev.biblio.apibiblio.errors.FullWaintingQueueException;
+import com.ocdev.biblio.apibiblio.errors.FullWaitingQueueException;
 import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 import com.ocdev.biblio.apibiblio.errors.NotEnoughCopiesException;
 import com.ocdev.biblio.apibiblio.services.PretService;
@@ -41,7 +41,7 @@ public class ReservationController
 	@PutMapping(value = "/reservations/abonne/{abonneId}/ouvrage/{ouvrageId}", produces = "application/json" )
 	public ResponseEntity<Pret> reservation(@ApiParam(value = "ID de l'abonné", required = true, example = "1") @PathVariable @Min(1) final Long abonneId, 
 			@ApiParam(value = "ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final Long ouvrageId)
-					throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaintingQueueException
+					throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException
 	{
 		Pret result = pretService.reserver(abonneId, ouvrageId);
 		return new ResponseEntity<Pret>(result, HttpStatus.CREATED);

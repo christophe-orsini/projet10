@@ -22,7 +22,7 @@ import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.DelayLoanException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
-import com.ocdev.biblio.apibiblio.errors.FullWaintingQueueException;
+import com.ocdev.biblio.apibiblio.errors.FullWaitingQueueException;
 import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 import com.ocdev.biblio.apibiblio.errors.NotEnoughCopiesException;
 import com.ocdev.biblio.apibiblio.utils.AppSettings;
@@ -172,7 +172,7 @@ public class PretServiceImpl implements PretService
 	
 	@Override
 	@Transactional
-	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaintingQueueException
+	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException
 	{
 		// verfifier si l'abonné existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
@@ -191,7 +191,7 @@ public class PretServiceImpl implements PretService
 		// verifier que la file d'attente n'est pas pleine
 		int nbreReservation = nbreReserve(ouvrageId);
 		int nbreMaxiReservation = ouvrage.get().getNbreExemplaireTotal() * AppSettings.getIntSetting("reservation.multiple");
-		if (nbreReservation >= nbreMaxiReservation)throw new FullWaintingQueueException("Nombre de réservation maximale atteinte pour cet ouvrage car ");
+		if (nbreReservation >= nbreMaxiReservation)throw new FullWaitingQueueException("Nombre de réservation maximale atteinte pour cet ouvrage car ");
 		
 		// initialisation du pret
 		Pret pret = new Pret(abonne.get(), ouvrage.get());

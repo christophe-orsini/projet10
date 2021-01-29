@@ -6,9 +6,9 @@ package com.ocdev.biblio.apibiblio.errors;
  * Http Status Code : {@link com.ocdev.biblio.apibiblio.errors.BiblioHttpStatus#BIBLIO_NO_MORE}
  * @author C.Orsini
  */
-public class FullWaintingQueueException extends BiblioException
+public class FullWaitingQueueException extends BiblioException
 {
-	public FullWaintingQueueException(String message)
+	public FullWaitingQueueException(String message)
 	{
 		super(message);
 	}
