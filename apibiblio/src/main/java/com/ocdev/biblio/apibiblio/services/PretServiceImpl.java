@@ -176,31 +176,34 @@ public class PretServiceImpl implements PretService
 	
 	@Override
 	@Transactional
-	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException
+	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException
 	{
 		// verfifier si l'abonné existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
 		if (!abonne.isPresent()) throw new EntityNotFoundException("L'abonné n'existe pas");
 				
-		// verfifier si l'ouvrage existe
+		// verifier si l'ouvrage existe
 		Optional<Ouvrage> ouvrage = ouvrageRepository.findById(ouvrageId);
 		if (!ouvrage.isPresent()) throw new EntityNotFoundException("L'ouvrage n'existe pas");
 		
-		// recherche si un pret en cours existe deja
+		// vérifier que l'ouvrage est indisponible
+		if (ouvrage.get().getNbreExemplaire() > 0) throw new NotAllowedException("Cet ouvrage est disponible");
+		
+		// recherche si un pret en cours existe deja RG3
 		Optional<Pret> pretExists = pretRepository.findByAbonneIdAndOuvrageIdAndEnPret(abonneId, ouvrageId);
 		if (pretExists.isPresent()) throw new AlreadyExistsException("Un prêt est en cours pour cet abonné et cet ouvrage");
 		
-		// recherche si un pret en cours ou une réservation existe deja
+		// recherche si une réservation existe deja
 		Optional<Pret> reservationExists = pretRepository.findByAbonneIdAndOuvrageIdAndReserve(abonneId, ouvrageId);
 		if (reservationExists.isPresent()) throw new AlreadyExistsException("Une réservation existe déjà pour cet abonné et cet ouvrage");		
 		
 		// verifier qu'il existe au moins un exemplaire pour l'ouvrage
 		if (ouvrage.get().getNbreExemplaireTotal() < 1) throw new NotEnoughCopiesException("Pas assez d'exemplaires pour le prêt de cet ouvrage");
 		
-		// verifier que la file d'attente n'est pas pleine
+		// verifier que la file d'attente n'est pas pleine RG2
 		int nbreReservation = pretRepository.findAllReservationsByOuvrageId(ouvrageId).size();
 		int nbreMaxiReservation = ouvrage.get().getNbreExemplaireTotal() * AppSettings.getIntSetting("reservation.multiple");
-		if (nbreReservation >= nbreMaxiReservation)throw new FullWaitingQueueException("Nombre de réservation maximale atteinte pour cet ouvrage car ");
+		if (nbreReservation >= nbreMaxiReservation)throw new FullWaitingQueueException("Nombre de réservation maximale atteinte pour cet ouvrage");
 		
 		// initialisation du pret
 		Pret pret = new Pret(abonne.get(), ouvrage.get());

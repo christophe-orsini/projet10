@@ -80,8 +80,9 @@ public interface PretService
 	 * @throws EntityNotFoundException levée si l'ouvrage ou l'abonné n'existent pas
 	 * @throws NotEnoughCopiesException levée s'il n'y a pas d'exemplaires pour cet ouvrage
 	 * @throws FullWaitingQueueException levée s'il la file de demande de réservation pour cet ouvrage est pleine
+	 * @throws NotAllowedException levée si l'ouvrage est disponible
 	 */
-	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException;
+	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException;
 	/**
 	 * Annulation d'une réservation.
 	 * @param reservationId L'ID de la réservation

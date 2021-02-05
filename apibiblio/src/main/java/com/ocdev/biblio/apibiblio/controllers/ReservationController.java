@@ -44,12 +44,13 @@ public class ReservationController
 			@ApiResponse(code = 404, message = "L'abonné et/ou l'ouvrage n'existe pas"),
 			@ApiResponse(code = 460, message = "Réservation impossible car une prêt en cours existe déjà pour cet ouvrage et cet abonné"),
 			@ApiResponse(code = 462, message = "Pas assez d'exemplaires pour la réservation de cet ouvrage"),
-			@ApiResponse(code = 463, message = "Nombre maximum de réservation atteint pour cet ouvrage")
+			@ApiResponse(code = 463, message = "Nombre maximum de réservation atteint pour cet ouvrage"),
+			@ApiResponse(code = 469, message = "Ouvrage avec exemplaire disponible")
 			})
 	@PutMapping(value = "/reservations/abonne/{abonneId}/ouvrage/{ouvrageId}", produces = "application/json" )
 	public ResponseEntity<Pret> reservation(@ApiParam(value = "ID de l'abonné", required = true, example = "1") @PathVariable @Min(1) final Long abonneId, 
 			@ApiParam(value = "ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final Long ouvrageId)
-					throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException
+					throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException
 	{
 		Pret result = pretService.reserver(abonneId, ouvrageId);
 		return new ResponseEntity<Pret>(result, HttpStatus.CREATED);
