@@ -260,13 +260,13 @@ public class PretServiceImpl implements PretService
 			List<Pret> ouvragesReserves = (List<Pret>) pretRepository.findAllReservationsByOuvrageId(reservation.getOuvrage().getId());
 			int rang = ouvragesReserves.indexOf(reservation);
 						
-			Pret prochainRetour = pretRepository.findFirstPretByOuvrageId(reservation.getOuvrage().getId());
+			Optional<Pret> prochainRetour = pretRepository.findFirstPretByOuvrageId(reservation.getOuvrage().getId());
 			
 			ReservationDto reservationDto = reservationConverter.convertEntityToDto(reservation);
 			reservationDto.setRang(++rang);
-			if (prochainRetour != null)
+			if (prochainRetour.isPresent())
 			{
-				reservationDto.setDateDisponible(prochainRetour.getDateFinPrevu());
+				reservationDto.setDateDisponible(prochainRetour.get().getDateFinPrevu());
 			}
 			else
 			{

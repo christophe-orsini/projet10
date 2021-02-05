@@ -52,7 +52,7 @@ public class PretController
 		return "redirect:/abonne/listeReservations";
 	}
 	
-	@GetMapping("/abonne/reserver/{id}")
+	@GetMapping("/abonne/reserver/{ouvrageId}")
 	public String reserver(@PathVariable long ouvrageId, Model model, Principal utilisateur)
 	{
 		pretService.reserver(utilisateur, ouvrageId);

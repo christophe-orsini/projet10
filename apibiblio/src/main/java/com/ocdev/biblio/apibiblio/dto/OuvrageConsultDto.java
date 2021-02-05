@@ -1,6 +1,8 @@
 package com.ocdev.biblio.apibiblio.dto;
 
 import java.io.Serializable;
+import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -28,6 +30,10 @@ public class OuvrageConsultDto implements Serializable
 	private String theme;
 	@ApiModelProperty(position = 8, value = "True si réservable")
 	private boolean reservable;
+	@ApiModelProperty(position = 9, value = "Date du prochainretour d'un exemplaire de l'ouvrage")
+	private Date prochainRetour;
+	@ApiModelProperty(position = 10, value = "Nombre de réservations en cours")
+	private int nbreReservations;
 	
 	public Long getId() {
 		return id;
@@ -86,5 +92,17 @@ public class OuvrageConsultDto implements Serializable
 	}
 	public void setReservable(boolean reservable) {
 		this.reservable = reservable;
+	}
+	public Date getProchainRetour() {
+		return prochainRetour;
+	}
+	public void setProchainRetour(Date prochainRetour) {
+		this.prochainRetour = prochainRetour;
+	}
+	public int getNbreReservations() {
+		return nbreReservations;
+	}
+	public void setNbreReservations(int nbreReservations) {
+		this.nbreReservations = nbreReservations;
 	}
 }

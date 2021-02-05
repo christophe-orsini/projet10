@@ -37,5 +37,5 @@ public interface PretRepository extends JpaRepository<Pret, Long>
 	Collection<Pret> findAllReservationsByAbonneId(Long abonneId);
 	
 	@Query(value = "SELECT * FROM Pret p WHERE ouvrage_id = ?1 AND (statut = 'EN_COURS' OR statut = 'PROLONGE' OR statut = 'RETARD') ORDER BY date_fin_prevu LIMIT 1", nativeQuery = true)
-	Pret findFirstPretByOuvrageId(Long ouvrageId);
+	Optional<Pret> findFirstPretByOuvrageId(Long ouvrageId);
 }

@@ -1,6 +1,7 @@
 package com.ocdev.biblio.webapp.dto;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * DTO utilisé pour la consultation d'un ouvrage
@@ -17,6 +18,8 @@ public class OuvrageConsultDto implements Serializable
 	private int nbreExemplaire;
 	private String theme;
 	private boolean reservable;
+	private Date prochainRetour;
+	private int nbreReservations;
 	
 	public Long getId() {
 		return id;
@@ -76,4 +79,17 @@ public class OuvrageConsultDto implements Serializable
 	public void setReservable(boolean reservable) {
 		this.reservable = reservable;
 	}
+	public Date getProchainRetour() {
+		return prochainRetour;
+	}
+	public void setProchainRetour(Date prochainRetour) {
+		this.prochainRetour = prochainRetour;
+	}
+	public int getNbreReservations() {
+		return nbreReservations;
+	}
+	public void setNbreReservations(int nbreReservations) {
+		this.nbreReservations = nbreReservations;
+	}
+
 }

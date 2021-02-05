@@ -1,5 +1,6 @@
 package com.ocdev.biblio.apibiblio.services;
 
+import java.util.Date;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -64,9 +65,26 @@ public class OuvrageServiceImpl implements OuvrageService
 		OuvrageConsultDto result = ouvrageConsultConverter.convertEntityToDto(ouvrage.get());
 		result.setReservable(false);
 		
+		
+		// Date prochain retour
+		Optional<Pret> pret = pretRepository.findFirstPretByOuvrageId(ouvrageId);
+		if (pret.isPresent())
+		{
+			result.setProchainRetour(pret.get().getDateFinPrevu());
+		}
+		else
+		{
+			result.setProchainRetour(new Date());	
+		}
+		
+		// nbre reservation
+		int nbreReservations = pretRepository.findAllReservationsByOuvrageId(ouvrageId).size();
+		result.setNbreReservations(nbreReservations);
+		
 		if (ouvrage.get().getNbreExemplaire() > 0) return result;
 		
-		Optional<Pret> pret = pretRepository.findByAbonneIdAndOuvrageIdAndEnPret(utilisateurId, ouvrageId);
+		// reservable
+		pret = pretRepository.findByAbonneIdAndOuvrageIdAndEnPret(utilisateurId, ouvrageId);
 		if (pret.isPresent()) return result;
 		
 		pret = pretRepository.findByAbonneIdAndOuvrageIdAndReserve(utilisateurId, ouvrageId);

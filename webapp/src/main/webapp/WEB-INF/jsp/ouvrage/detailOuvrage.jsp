@@ -24,14 +24,20 @@
 			</div>
 			<div class="row col-12">
 				<p class="col-md-4 p-0">Auteur : ${ouvrage.auteur}<p>
-				<p class="col-7 col-md-4 p-0">Exemplaires disponibles : ${ouvrage.nbreExemplaire}<p>				
+				<p class="col-7 col-md-4 p-0">Exemplaires disponibles : ${ouvrage.nbreExemplaire}<p>
 			</div>			
 		</div>
+		<c:if test="${ ouvrage.nbreReservations > 0 || ouvrage.reservable}">
+			<div class="row col-12">
+				<p class="col-md-4 p-0">Date du prochain retour : <fmt:formatDate type="DATE" pattern="dd/MM/yyyy" value="${ouvrage.prochainRetour}" /><p>
+				<p class="col 7 col-md-4 p-0">Nombre de réservation en cours : ${ouvrage.nbreReservations}<p>
+				<c:if test="${ ouvrage.reservable }">	
+					<a class="btn btn-primary ml-3" href="/abonne/reserver/${ouvrage.id}" role="button">Réserver</a>
+				</c:if>
+			</div>
+		</c:if>
 		<div class="row col-12">
 			<a class="btn btn-primary" href="/abonne/listeOuvrages" role="button">Retour</a>
-			<c:if test="${ ouvrage.reservable }">
-				<a class="btn btn-primary ml-3" href="/abonne/listeOuvrages" role="button">Réserver</a>
-			</c:if>
 		</div>
 	</section>
 <%@ include file="../theme/footer.jsp" %>
