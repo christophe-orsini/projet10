@@ -84,10 +84,7 @@ public class OuvrageServiceImpl implements OuvrageService
 		if (ouvrage.get().getNbreExemplaire() > 0) return result;
 		
 		// reservable
-		pret = pretRepository.findByAbonneIdAndOuvrageIdAndEnPret(utilisateurId, ouvrageId);
-		if (pret.isPresent()) return result;
-		
-		pret = pretRepository.findByAbonneIdAndOuvrageIdAndReserve(utilisateurId, ouvrageId);
+		pret = pretRepository.findByAbonneIdAndOuvrageIdAndEnPretOrReserve(utilisateurId, ouvrageId);
 		if (pret.isPresent()) return result;
 		
 		result.setReservable(true);

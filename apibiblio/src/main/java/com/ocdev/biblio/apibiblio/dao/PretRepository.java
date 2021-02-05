@@ -25,6 +25,9 @@ public interface PretRepository extends JpaRepository<Pret, Long>
 	@Query(value = "SELECT p FROM Pret p WHERE abonne_id = ?1 AND ouvrage_id = ?2 AND (statut = 'RESERVE' OR statut = 'DISPONIBLE')")
 	Optional<Pret> findByAbonneIdAndOuvrageIdAndReserve(Long abonneId, Long ouvrageId);	
 	
+	@Query(value = "SELECT p FROM Pret p WHERE abonne_id = ?1 AND ouvrage_id = ?2 AND (statut = 'EN_COURS' OR statut = 'PROLONGE' OR statut = 'RETARD' or statut = 'RESERVE' OR statut = 'DISPONIBLE')")
+	Optional<Pret> findByAbonneIdAndOuvrageIdAndEnPretOrReserve(Long abonneId, Long ouvrageId);
+	
 	@Query(value = "SELECT p FROM Pret p WHERE abonne_id = ?1 AND (statut = 'EN_COURS' OR statut = 'PROLONGE' OR statut = 'RETARD')")
 	Page<Pret> findAllPretsByAbonneId(Long abonneId, Pageable paging);
 	
