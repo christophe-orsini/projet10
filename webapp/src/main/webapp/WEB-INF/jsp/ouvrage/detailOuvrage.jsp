@@ -17,6 +17,9 @@
 				<p>Titre : ${ouvrage.titre} ${ouvrage.anneeEdition}</p>
 			</div>
 			<div class="row col-12">
+				<p>Thème : ${ouvrage.theme}</p>
+			</div>
+			<div class="row col-12">
 				<p>Résumé : ${ouvrage.resume}</p> 
 			</div>
 			<div class="row col-12">
@@ -24,8 +27,11 @@
 				<p class="col-7 col-md-4 p-0">Exemplaires disponibles : ${ouvrage.nbreExemplaire}<p>				
 			</div>			
 		</div>
-		<div class="col-12">
+		<div class="row col-12">
 			<a class="btn btn-primary" href="/abonne/listeOuvrages" role="button">Retour</a>
+			<c:if test="${ ouvrage.reservable }">
+				<a class="btn btn-primary ml-3" href="/abonne/listeOuvrages" role="button">Réserver</a>
+			</c:if>
 		</div>
 	</section>
 <%@ include file="../theme/footer.jsp" %>

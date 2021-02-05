@@ -51,4 +51,12 @@ public class PretController
 				
 		return "redirect:/abonne/listeReservations";
 	}
+	
+	@GetMapping("/abonne/reserver/{id}")
+	public String reserver(@PathVariable long ouvrageId, Model model, Principal utilisateur)
+	{
+		pretService.reserver(utilisateur, ouvrageId);
+				
+		return "redirect:/abonne/listeOuvrages";
+	}
 }

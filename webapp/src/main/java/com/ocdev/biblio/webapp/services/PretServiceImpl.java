@@ -84,6 +84,21 @@ public class PretServiceImpl implements PretService
 		
 		return result.getStatusCode();
 	}
+
+	@Override
+	public Pret reserver(Principal abonne, long ouvrageId) throws EntityNotFoundException
+	{
+		RestTemplate restTemplate = restTemplateService.buildRestTemplate();
+		
+		// recherche de l'abonné
+		Long abonneId = utilisateurService.getAbonneId(abonne);
+		
+		ResponseEntity<Pret> result = restTemplate.exchange(
+				properties.getApiUrl() + "/reservations/abonne/" + abonneId + "/ouvrage/" + ouvrageId,
+				HttpMethod.PUT, null, Pret.class);
+		
+		return result.getBody();
+	}
 	
 	
 }
