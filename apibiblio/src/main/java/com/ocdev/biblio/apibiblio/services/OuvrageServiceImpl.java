@@ -19,6 +19,7 @@ import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
+import com.ocdev.biblio.apibiblio.utils.AppSettings;
 
 @Service
 public class OuvrageServiceImpl implements OuvrageService
@@ -65,7 +66,6 @@ public class OuvrageServiceImpl implements OuvrageService
 		OuvrageConsultDto result = ouvrageConsultConverter.convertEntityToDto(ouvrage.get());
 		result.setReservable(false);
 		
-		
 		// Date prochain retour
 		Optional<Pret> pret = pretRepository.findFirstPretByOuvrageId(ouvrageId);
 		if (pret.isPresent())
@@ -81,6 +81,11 @@ public class OuvrageServiceImpl implements OuvrageService
 		int nbreReservations = pretRepository.findAllReservationsByOuvrageId(ouvrageId).size();
 		result.setNbreReservations(nbreReservations);
 		
+		// nbre max de reservations atteint
+		int nbreMaxiReservation = ouvrage.get().getNbreExemplaireTotal() * AppSettings.getIntSetting("reservation.multiple");
+		if (nbreReservations >= nbreMaxiReservation) return result;
+		
+		// exemplaire disponible
 		if (ouvrage.get().getNbreExemplaire() > 0) return result;
 		
 		// reservable
