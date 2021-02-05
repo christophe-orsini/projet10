@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.ocdev.biblio.webapp.dto.OuvrageConsultDto;
 import com.ocdev.biblio.webapp.dto.SearchOuvrageDto;
 import com.ocdev.biblio.webapp.objects.Ouvrage;
 import com.ocdev.biblio.webapp.services.OuvrageService;
@@ -34,9 +36,9 @@ public class OuvrageController
 	}
 	
 	@GetMapping("/abonne/detailOuvrage/{id}")
-	public String consulter(@PathVariable Long id,  Model model, Principal utilisateur)
+	public String consulter(@PathVariable long id,  Model model, Principal utilisateur)
 	{
-		Ouvrage response = ouvrageService.getOuvrageById(id);
+		OuvrageConsultDto response = ouvrageService.getOuvrageById(utilisateur, id);
 		model.addAttribute("ouvrage", response);
 		return "/ouvrage/detailOuvrage";
 	}
