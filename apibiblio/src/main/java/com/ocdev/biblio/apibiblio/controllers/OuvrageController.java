@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.ocdev.biblio.apibiblio.criterias.OuvrageCriteria;
+import com.ocdev.biblio.apibiblio.dto.OuvrageConsultDto;
 import com.ocdev.biblio.apibiblio.dto.OuvrageCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
@@ -51,14 +52,15 @@ public class OuvrageController
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "L'ouvrage trouvé est retourné dans le corps de la réponse"),
 			@ApiResponse(code = 403, message = "Authentification requise"),
-			@ApiResponse(code = 404, message = "L'ouvrage avec cet ID n'existe pas")
+			@ApiResponse(code = 404, message = "L'ouvrage ou l'utilisateur avec cet ID n'existe pas")
 			})
-	@GetMapping(value = "/ouvrages/{ouvrageId}", produces = "application/json")
-	public ResponseEntity<Ouvrage> getOuvrageById(@ApiParam(value="ID de l'ouvrage", required = true, example = "1")
-			@PathVariable @Min(1) final long ouvrageId) throws EntityNotFoundException
+	@GetMapping(value = "/ouvrages/{ouvrageId}/utilisateur/{utilisateurId}", produces = "application/json")
+	public ResponseEntity<OuvrageConsultDto> getOuvrageById(@ApiParam(value="ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final long ouvrageId,
+			@ApiParam(value="ID de l'utilisateur", required = true, example = "1")
+			@PathVariable @Min(1) final long utilisateurId) throws EntityNotFoundException
 	{
-		Ouvrage ouvrage = ouvrageService.consulterOuvrage(ouvrageId);
-		return new ResponseEntity<Ouvrage>(ouvrage, HttpStatus.OK);
+		OuvrageConsultDto ouvrage = ouvrageService.consulterOuvrage(ouvrageId, utilisateurId);
+		return new ResponseEntity<OuvrageConsultDto>(ouvrage, HttpStatus.OK);
 	}
 	
 	@ApiOperation(value = "Recherche d'ouvrages", notes = "Obtenir une liste d'ouvrages correspondant à plusieurs critères de recherche")

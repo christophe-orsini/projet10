@@ -186,7 +186,7 @@ public class PretServiceImpl implements PretService
 		Optional<Ouvrage> ouvrage = ouvrageRepository.findById(ouvrageId);
 		if (!ouvrage.isPresent()) throw new EntityNotFoundException("L'ouvrage n'existe pas");
 		
-		// vérifier que l'ouvrage est indisponible
+		// vérifier que l'ouvrage est indisponible RG8
 		if (ouvrage.get().getNbreExemplaire() > 0) throw new NotAllowedException("Cet ouvrage est disponible");
 		
 		// recherche si un pret en cours existe deja RG3

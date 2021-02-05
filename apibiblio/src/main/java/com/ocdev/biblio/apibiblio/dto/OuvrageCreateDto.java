@@ -7,6 +7,11 @@ import javax.validation.constraints.PositiveOrZero;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+/**
+ * DTO utilisé pour la création d'un ouvrage
+ * @author PC_ASUS
+ *
+ */
 @ApiModel(value = "OuvrageCreateDto", description = "Modèle DTO pour la création d'un Ouvrage")
 public class OuvrageCreateDto implements Serializable
 {
