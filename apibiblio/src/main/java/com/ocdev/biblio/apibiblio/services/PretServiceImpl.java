@@ -119,6 +119,13 @@ public class PretServiceImpl implements PretService
 		// verifier si le pret peut etre prolongé
 		if (pret.get().getProlongationsPossible() <= 0) throw new DelayLoanException("Le prêt ne peut plus être prolongé");
 		
+		// verifier si le pret est en retard
+		Calendar ceSoirMinuit = Calendar.getInstance();
+		ceSoirMinuit.set(Calendar.HOUR_OF_DAY, 0);
+		ceSoirMinuit.set(Calendar.MINUTE, 0);
+		ceSoirMinuit.add(Calendar.DAY_OF_MONTH, 1); 
+		if (pret.get().getDateFinPrevu().before(ceSoirMinuit.getTime())) throw new DelayLoanException("Le prêt ne peut plus être prolongé");
+		
 		// verifier si le demandeur est l'emprunteur ou un employé
 		Utilisateur utilisateur = pret.get().getAbonne();
 		if (utilisateur.getRole() == Role.ROLE_ABONNE && utilisateur.getId() != utilisateurId)
