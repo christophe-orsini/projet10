@@ -36,8 +36,6 @@
 									role="button">Prolonger</a>
 							</c:if>
 							<c:if test="${pret.dateFinPrevu < now}">En retard</c:if>
-							<c:if test="${pret.dateFinPrevu < now && pret.prolongationsPossible <=0}">
-								&nbsp;sans prolongation possible</c:if>
 						</td>
 					</tr>
 					</c:forEach>
