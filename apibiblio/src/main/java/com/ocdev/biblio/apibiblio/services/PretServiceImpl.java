@@ -105,7 +105,8 @@ public class PretServiceImpl implements PretService
 		// mettre a jour le nombre d'exemplaires
 		Ouvrage ouvrage = pret.get().getOuvrage();
 		ouvrage.setNbreExemplaire(ouvrage.getNbreExemplaire() + 1);
-		pret.get().setOuvrage(ouvrage);
+		// sauvegarde de l'ouvrage
+		ouvrageRepository.save(ouvrage);
 				
 		// set date de retour
 		pret.get().setDateRetour(new Date());
@@ -113,6 +114,9 @@ public class PretServiceImpl implements PretService
 		pret.get().setStatut(Statut.RETOURNE);
 		// sauvegarder
 		pretRepository.save(pret.get());
+		
+		// recherche de la prochaine reservation
+		prochaineReservation(pret.get().getOuvrage().getId());
 	}
 
 	@Override
@@ -277,5 +281,30 @@ public class PretServiceImpl implements PretService
 		}
 		
 		return results;
+	}
+	
+	private void prochaineReservation(Long ouvrageId)
+	{
+		// Chercher la prochaine réservation
+		Optional<Pret> reservation = pretRepository.findNextReservationsByOuvrageId(ouvrageId);
+		if (!reservation.isPresent()) return; // plus de réservations
+		
+		// Mettre la date d'expiration
+		Calendar c = Calendar.getInstance();
+		c.setTime(new Date());
+		c.add(Calendar.HOUR, AppSettings.getIntSetting("reservation.attente"));
+		reservation.get().setDateHeureExpiration(c.getTime());
+		
+		// Changer le statut
+		reservation.get().setStatut(Statut.DISPONIBLE);
+		
+		// mettre a jour le nombre d'exemplaires
+		Ouvrage ouvrage = reservation.get().getOuvrage();
+		ouvrage.setNbreExemplaire(ouvrage.getNbreExemplaire() - 1);
+		// sauvegarde de l'ouvrage
+		ouvrageRepository.save(ouvrage);
+			
+		// Sauver=garder
+		pretRepository.save(reservation.get());
 	}
 }
