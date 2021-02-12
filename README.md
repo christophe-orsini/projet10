@@ -3,7 +3,7 @@
 ## Project N°7 Gestion du SI des bibliothèques de Bouquinville
 
 * Développeur : Christophe ORSINI
-* Version 1.0.6
+* Version 1.0.7
 
 ---
 ### Prérequis
@@ -35,6 +35,10 @@ rubriques `spring.datasource.username` et `spring.datasource.password`
 
 L'application est prète à fonctionner avec l'utilisateur :
 - `abonne@biblio.fr` mot de passe `abonne` pour le rôle d'utilisateur connecté
+
+### Mise à jour pour la version 1.0.7
+Pour mettre à jour l'application, exécuter les étapes 2, 5 et 6 ci-dessus  
+> L'application doit être arrêtée avant la mise à jour
 
 ### Nettoyage
 Si necessaire, vous pouvez supprimer les données de démonstration en exécutant le script `clean-datas.sql` et la base de données sera entièrement vidées.  
