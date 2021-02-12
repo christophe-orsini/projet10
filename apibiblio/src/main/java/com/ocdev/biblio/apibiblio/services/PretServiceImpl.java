@@ -255,6 +255,9 @@ public class PretServiceImpl implements PretService
 		reservation.get().setStatut(Statut.ANNULEE);
 		// sauvegarder
 		pretRepository.save(reservation.get());
+		
+		// verifier si une autre reservation peut etre honorée
+		prochaineReservation(reservation.get().getOuvrage().getId());
 	}
 	
 	@Override
