@@ -31,13 +31,11 @@
 						<td><fmt:formatDate type="DATE" pattern="dd/MM/yyyy" value="${pret.dateDebut}" /></td>
 						<td><fmt:formatDate type="DATE" pattern="dd/MM/yyyy" value="${pret.dateFinPrevu}" /></td>
 						<td>
-							<c:if test="${pret.prolongationsPossible > 0}">
+							<c:if test="${pret.prolongationsPossible > 0 && pret.dateFinPrevu >= now}">
 								<a class="btn btn-primary ml-2" href="/abonne/prolongerPret/${pret.id}" 
 									role="button">Prolonger</a>
 							</c:if>
 							<c:if test="${pret.dateFinPrevu < now}">En retard</c:if>
-							<c:if test="${pret.dateFinPrevu < now && pret.prolongationsPossible <=0}">
-								&nbsp;sans prolongation possible</c:if>
 						</td>
 					</tr>
 					</c:forEach>
