@@ -26,5 +26,6 @@ INSERT INTO pret (id, date_heure_reservation, date_debut, date_fin_prevu, date_r
 (3, NULL, "2020-12-08", "2021-02-02", NULL, "PROLONGE", 2, 3, 2, 0),
 (4, NULL, "2021-01-05", "2021-02-02", NULL, "EN_COURS", 2, 4, 1, 1),
 (5, NULL, "2021-01-05", "2021-02-02", NULL, "EN_COURS", 3, 5, 0, 0),
-(6, "2021-01-06 15:29:52", NULL, NULL, NULL, "RESERVE", 1, 5, 0, 0),
-(7, "2021-01-18 10:53:07", NULL, NULL, NULL, "RESERVE", 2, 5, 0, 0);
+(6, "2021-01-06 15:29:52", NULL, NULL, NULL, "RESERVE", 1, 4, 0, 0),
+(7, "2021-01-18 10:53:07", NULL, NULL, NULL, "RESERVE", 2, 5, 0, 0),
+(8, "2021-01-06 15:29:53", NULL, NULL, NULL, "RESERVE", 3, 4, 0, 0);
