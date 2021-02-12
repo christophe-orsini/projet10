@@ -98,4 +98,13 @@ public interface PretService
 	 * @throws EntityNotFoundException levée si l'abonné n'existe pas
 	 */
 	public Collection<ReservationDto> listerReservationsAbonne(Long abonneId) throws EntityNotFoundException;
+	/**
+	 * Retrait d'un ouvrage réservé et disponible suite à envoi d'email.
+	 * @param reservationId L'ID de la réservation
+	 * @param utilisateurId L'ID du demandeur
+	 * @return Le prêt créé
+	 * @throws EntityNotFoundException levée si la réservation n'existe pas
+	 * @throws NotAllowedException levée si la demande ne vient pas de l'emprunteur ou d'un employé
+	 */
+	public Pret retirerReservation(Long reservationId, Long utilisateurId) throws EntityNotFoundException, NotAllowedException;
 }

@@ -283,6 +283,43 @@ public class PretServiceImpl implements PretService
 		return results;
 	}
 	
+	@Override
+	@Transactional
+	public Pret retirerReservation(Long reservationId, Long utilisateurId) throws EntityNotFoundException, NotAllowedException
+	{
+		Optional<Pret> reservation = pretRepository.findById(reservationId);
+		if (!reservation.isPresent()) throw new EntityNotFoundException("La réservation n'existe pas");
+		
+		// verifier si la réservation est disponible
+		if (reservation.get().getStatut() != Statut.DISPONIBLE) throw new EntityNotFoundException("La réservation n'existe pas");
+		
+		// verifier si le demandeur existe
+		Optional<Utilisateur> demandeur = utilisateurRepository.findById(utilisateurId);
+		if (!demandeur.isPresent()) throw new EntityNotFoundException("Le demandeur n'existe pas");
+		
+		// verifier si le demandeur est l'emprunteur ou un employé
+		Utilisateur emprunteur = reservation.get().getAbonne();
+		if (demandeur.get().getRole() == Role.ROLE_ABONNE && demandeur.get().getId() != emprunteur.getId())
+			throw new NotAllowedException("Vous ne pouvez pas retirer cette réservation. Vous n'etes pas l'emprunteur");
+				
+		// changer statut
+		reservation.get().setStatut(Statut.EN_COURS);
+		
+		// set dates pret et retour prevue
+		Calendar c = Calendar.getInstance();
+		c.setTime(new Date());
+		reservation.get().setDateDebut(c.getTime());
+		c.add(Calendar.DAY_OF_MONTH, AppSettings.getIntSetting("duree-pret"));
+		reservation.get().setDateFinPrevu(c.getTime());
+		
+		// Initialiser le nombre de prolongations et de periode possible
+		reservation.get().setProlongationsPossible(AppSettings.getIntSetting("nbre-prolongations"));
+		reservation.get().setPeriodes(1);
+		
+		// sauvegarder
+		return pretRepository.save(reservation.get());
+	}
+	
 	private void prochaineReservation(Long ouvrageId)
 	{
 		// Chercher la prochaine réservation
