@@ -17,4 +17,5 @@ public interface PretService
 	public Page<ReservationDto> listeReservations(Principal abonne, int page, int taille) throws EntityNotFoundException;
 	public HttpStatus annulerReservation(Principal abonne, Long reservationId) throws EntityNotFoundException;
 	public Pret reserver(Principal abonne, long ouvrageId) throws EntityNotFoundException;
+	public HttpStatus retirerReservation(Principal abonne, Long reservationId) throws EntityNotFoundException;
 }

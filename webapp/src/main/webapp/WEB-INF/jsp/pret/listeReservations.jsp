@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
+ <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -19,8 +19,8 @@
 					<tr>
 						<th>Titre</th>
 						<th class="text-center">Réservé le</th>
-						<th class="text-center">Position dans la liste d'attente</th>
-						<th class="text-center">Disponible le</th>
+						<th class="text-center">Informations</th>
+						<th class="text-center">Disponibilité</th>
 						<th></th>
 					</tr>
 				</thead>	
@@ -30,9 +30,20 @@
 					<tr>
 						<td>${reservation.ouvrage.titre}</td>
 						<td class="text-center"><fmt:formatDate type="DATE" pattern="dd/MM/yyyy hh:mm" value="${reservation.dateHeureReservation}" /></td>
-						<td class="text-center">${reservation.rang}</td>
-						<td class="text-center"><fmt:formatDate type="DATE" pattern="dd/MM/yyyy" value="${reservation.dateDisponible}" /></td>
-						<td class="text-center"><a class="btn btn-primary ml-2" href="/abonne/annulerReservation/${reservation.id}" role="button">Annuler</a></td>
+						<c:if test="${reservation.dateHeureExpiration == null}">
+							<td class="text-center">N° ${reservation.rang} dans le liste d'attente</td>
+							<td class="text-center">Prochaine : <fmt:formatDate type="DATE" pattern="dd/MM/yyyy" value="${reservation.dateDisponible}" /></td>
+						</c:if>
+						<c:if test="${reservation.dateHeureExpiration != null}">
+							<td class="text-center">Disponible</td>
+							<td class="text-center">Jusqu'au : <fmt:formatDate type="DATE" pattern="dd/MM/yyyy" value="${reservation.dateHeureExpiration}" /></td>
+						</c:if>
+						<td class="text-center">
+							<c:if test="${reservation.dateHeureExpiration != null}">
+								<a class="btn btn-primary ml-2" href="/abonne/retirerReservation/${reservation.id}" role="button">Retirer</a>
+							</c:if>
+							<a class="btn btn-primary ml-2" href="/abonne/annulerReservation/${reservation.id}" role="button">Annuler</a>
+						</td>
 					</tr>
 					</c:forEach>
 				</tbody>

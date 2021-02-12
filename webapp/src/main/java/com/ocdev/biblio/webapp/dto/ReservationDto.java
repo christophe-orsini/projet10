@@ -1,13 +1,16 @@
 package com.ocdev.biblio.webapp.dto;
 
 import java.util.Date;
-
 import com.ocdev.biblio.webapp.objects.Ouvrage;
+import com.ocdev.biblio.webapp.objects.Statut;
 
 public class ReservationDto
 {
 	private Long id;
 	private Date dateHeureReservation;
+	private Date dateHeureExpiration;
+	private boolean emailEnvoye;
+	private Statut statut;
 	private int rang;
 	private Date dateDisponible;
 	private Long abonneId;
@@ -24,6 +27,24 @@ public class ReservationDto
 	}
 	public void setDateHeureReservation(Date dateHeureReservation) {
 		this.dateHeureReservation = dateHeureReservation;
+	}
+	public Date getDateHeureExpiration() {
+		return dateHeureExpiration;
+	}
+	public void setDateHeureExpiration(Date dateHeureExpiration) {
+		this.dateHeureExpiration = dateHeureExpiration;
+	}
+	public boolean isEmailEnvoye() {
+		return emailEnvoye;
+	}
+	public void setEmailEnvoye(boolean emailEnvoye) {
+		this.emailEnvoye = emailEnvoye;
+	}
+	public Statut getStatut() {
+		return statut;
+	}
+	public void setStatut(Statut statut) {
+		this.statut = statut;
 	}
 	public int getRang() {
 		return rang;
