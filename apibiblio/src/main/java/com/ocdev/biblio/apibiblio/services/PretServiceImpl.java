@@ -240,7 +240,15 @@ public class PretServiceImpl implements PretService
 		Utilisateur emprunteur = reservation.get().getAbonne();
 		if (demandeur.get().getRole() == Role.ROLE_ABONNE && demandeur.get().getId() != emprunteur.getId())
 			throw new NotAllowedException("Vous ne pouvez pas annuler cette réservation. Vous n'etes pas le demandeur");
-				
+			
+		// si reservation disponible, corriger le stock
+		if (reservation.get().getStatut() == Statut.DISPONIBLE)
+		{
+			Ouvrage ouvrage = reservation.get().getOuvrage();
+			ouvrage.setNbreExemplaire(ouvrage.getNbreExemplaire() + 1);
+			ouvrageRepository.save(ouvrage);
+		}
+		
 		// set date d'annulation
 		reservation.get().setDateHeureReservation(new Date());
 		// changer statut
