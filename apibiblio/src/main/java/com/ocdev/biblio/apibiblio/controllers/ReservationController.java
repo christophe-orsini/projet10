@@ -58,7 +58,7 @@ public class ReservationController
 	
 	@ApiOperation(value = "Annulation d'une réservation", notes = "Annulation d'une réservation")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "L'annulationde la réservation est enregistrée"),
+			@ApiResponse(code = 200, message = "L'annulation de la réservation est enregistrée"),
 			@ApiResponse(code = 403, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "La réservation n'existe pas"),
 			@ApiResponse(code = 469, message = "Seul la personne qui a réservé ou un employé peuvent annuler une réservation")
@@ -89,5 +89,20 @@ public class ReservationController
 		List<ReservationDto> list = (List<ReservationDto>) pretService.listerReservationsAbonne(abonneId);
         
 		return new ResponseEntity<Page<ReservationDto>>(new PageImpl<ReservationDto>(list), HttpStatus.OK);
+	}
+	
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Le prêt est enregistré"),
+			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 404, message = "La réservation n'existe pas"),
+			@ApiResponse(code = 469, message = "Seul la personne qui a réservé ou un employé peuvent retirer une réservation")
+			})
+	@PutMapping(value ="/reservations/retirer/{reservationId}/utilisateur/{utilisateurId}", produces = "application/json")
+	public ResponseEntity<?> retirerReservation(@ApiParam(value = "ID de la réservation", required = true, example = "1")
+		@PathVariable @Min(1) final Long reservationId, @ApiParam(value = "ID du demandeur", required = true, example = "1")
+		@PathVariable @Min(1) final Long utilisateurId) throws EntityNotFoundException, NotAllowedException
+	{
+		pretService.retirerReservation(reservationId, utilisateurId);
+		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 }
