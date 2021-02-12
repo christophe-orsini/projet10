@@ -1,4 +1,4 @@
-package com.ocdev.biblio.apibiblio.utils;
+package com.ocdev.biblio.webapp.utils;
 
 import java.util.ResourceBundle;
 

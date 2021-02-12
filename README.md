@@ -1,6 +1,6 @@
 # BIBLIOTHEQUES DE BOUQUINVILLE
 
-## Project N°7 Gestion du SI des bibliothèques de Bouquinville
+## Project N°10 Gestion du SI des bibliothèques de Bouquinville
 
 * Développeur : Christophe ORSINI
 * Version 1.0.6
@@ -14,7 +14,7 @@
 Le serveur MySQL doit être en fonction et les ports 8080 et 8084 doivent être libres
 
 ### Chargement
-Clonez le dépôt à cette adresse [https://github.com/christophe-orsini/Projet7.git](https://github.com/christophe-orsini/Projet7.git)
+Clonez le dépôt à cette adresse [https://github.com/christophe-orsini/Projet10.git](https://github.com/christophe-orsini/Projet10.git)
 
 ### Deploiement, Installation et Exécution
 1. **Mettre le serveur MySQL en fonction**  
@@ -25,7 +25,7 @@ rubriques `spring.datasource.username` et `spring.datasource.password`
     - Placez vous dans le dossier où vous avez cloné le dépôt  
     - Tapez la commande `install` si vous êtes en mode console ou cliquez sur `install.bat`
     **N'utilisez pas encore l'application**
-3. Importer dans votre serveur MySQL le script `create-database.sql` pour créer la base de données et les tables
+3. Importer dans votre serveur MySQL le script `create-database-V2.sql` pour créer la base de données et les tables
 4. Importer dans votre serveur MySQL le script `data-mysql.sql` pour charger les données de démonstration dans la base
 5. Démarrez l'application pour exécuter les différents modules 
     - Tapez la commande `run` si vous êtes en mode console ou cliquez sur `run.bat` pour démarrer le serveur  
@@ -36,6 +36,24 @@ rubriques `spring.datasource.username` et `spring.datasource.password`
 L'application est prète à fonctionner avec l'utilisateur :
 - `abonne@biblio.fr` mot de passe `abonne` pour le rôle d'utilisateur connecté
 
+### Mise à jour de la version 1 vers la version 2
+Si la version 1 est déjà installée, mettre à jour avec la procédure ci-dessous :
+1. **Mettre le serveur MySQL en fonction**  
+2. **Installer l'application**  
+    - Placez vous dans le dossier où vous avez cloné le dépôt  
+    - Tapez la commande `install` si vous êtes en mode console ou cliquez sur `install.bat`
+    **N'utilisez pas encore l'application**
+3. Importer dans votre serveur MySQL le script `updatee-database-V2.sql` pour modifier la base de données et les tables
+4. Démarrez l'application normalement (Voir à partir du point 5 de la section **Deploiement, Installation et Exécution** ci-dessus)  
+   
+
+> Vous trouverez les fichiers de script *.sql dans les livrables ou dans le dossier biblio/apibiblio/src/main/ressources
+
 ### Nettoyage
 Si necessaire, vous pouvez supprimer les données de démonstration en exécutant le script `clean-datas.sql` et la base de données sera entièrement vidées.  
 Recommencez ensuite à l'étape 4 ci-dessus.
+
+### Outils
+Postman pour tester les requêtes API à l'adresse `http://<ip_hote>:8080`  
+MailTrap pour vérifier les emails envoyés à l'adresse [https://mailtrap.io/inboxes](https://mailtrap.io/inboxes)  
+Swagger pour la documentation de l'API à l'adresse `http://<ip_hote>:8080/v2/api-docs` et à l'adresse `http://<ip_hote>:8080/swagger-ui.html`
