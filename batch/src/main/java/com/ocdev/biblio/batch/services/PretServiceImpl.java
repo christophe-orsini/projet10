@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,4 +98,42 @@ public class PretServiceImpl implements PretService
 		
 		return result.getBody();
 	}	
+	
+	@Override
+	public Collection<Pret> listeEmailsAEnvoyer(Collection<Pret> listeReservationsDisponibles)
+	{
+		if (listeReservationsDisponibles == null || listeReservationsDisponibles.isEmpty())
+		{
+			return new ArrayList<Pret>();
+		}
+		
+		List<Pret> emailsAEnvoyer = new ArrayList<Pret>();
+		
+		for (Pret pret : listeReservationsDisponibles)
+		{
+			if (pret.isEmailEnvoye() == true) continue; // seulement les abonnés non prévenus
+			
+			emailsAEnvoyer.add(pret);
+		}
+		
+		return emailsAEnvoyer;
+	}
+	@Override
+	public void SetEmailEnvoyé(Collection<Pret> emailsAEnvoyer)
+	{
+		if (emailsAEnvoyer == null || emailsAEnvoyer.isEmpty()) return;
+		
+		Collection<Long> reservationsIDs = new ArrayList<Long>();
+		
+		for (Pret reservation : emailsAEnvoyer)
+		{
+			reservationsIDs.add(reservation.getId());
+		}
+		
+		RestTemplate restTemplate = restTemplateService.buildRestTemplate();
+		
+		restTemplate.postForObject(
+				properties.apiUrl() + "/reservations/enregistrer/emails/envoyes",
+				reservationsIDs, ResponseEntity.class);
+	}
 }

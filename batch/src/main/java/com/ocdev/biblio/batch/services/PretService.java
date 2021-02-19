@@ -26,4 +26,15 @@ public interface PretService
 	 * @return La liste des réservations
 	 */
 	public Collection<Pret> listeReservationsDisponibles();
+	/**
+	 * Obtenir la liste des réservations disponibles pour lesquelles un email n'a pas été envoyé
+	 * @param listeReservationsDisponibles
+	 * @return La liste des emails à envoyer
+	 */
+	Collection<Pret> listeEmailsAEnvoyer(Collection<Pret> listeReservationsDisponibles);
+	/**
+	 * Enregistrer l'envoi d'un email pour une liste de réservations
+	 * @param emailsAEnvoyer
+	 */
+	public void SetEmailEnvoyé(Collection<Pret> emailsAEnvoyer);
 }
