@@ -37,4 +37,15 @@ public interface PretService
 	 * @param emailsAEnvoyer
 	 */
 	public void SetEmailEnvoyé(Collection<Pret> emailsAEnvoyer);
+	/**
+	 * Obtenir la liste des réservations échues
+	 * @param reservationsDisponibles
+	 * @return La liste des réservations à annuler
+	 */
+	public Collection<Pret> listeReservationsEchues(Collection<Pret> reservationsDisponibles);
+	/**
+	 * Annuler une liste de réservations échues
+	 * @param reservationsEchues
+	 */
+	public void annulerReservations(Collection<Pret> reservationsEchues);
 }

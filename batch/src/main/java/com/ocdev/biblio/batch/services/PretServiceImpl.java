@@ -118,6 +118,29 @@ public class PretServiceImpl implements PretService
 		
 		return emailsAEnvoyer;
 	}
+
+	@Override
+	public Collection<Pret> listeReservationsEchues(Collection<Pret> reservationsDisponibles)
+	{
+		if (reservationsDisponibles == null || reservationsDisponibles.isEmpty())
+		{
+			return new ArrayList<Pret>();
+		}
+		
+		List<Pret> emailsAAnnuler = new ArrayList<Pret>();
+		
+		Date today = new Date();
+		
+		for (Pret pret : reservationsDisponibles)
+		{
+			if (pret.getDateHeureExpiration().after(today)) continue; // seulement les réservation echues
+			
+			emailsAAnnuler.add(pret);
+		}
+		
+		return emailsAAnnuler;
+	}
+
 	@Override
 	public void SetEmailEnvoyé(Collection<Pret> emailsAEnvoyer)
 	{
@@ -134,6 +157,25 @@ public class PretServiceImpl implements PretService
 		
 		restTemplate.postForObject(
 				properties.apiUrl() + "/reservations/enregistrer/emails/envoyes",
+				reservationsIDs, ResponseEntity.class);
+	}
+	
+	@Override
+	public void annulerReservations(Collection<Pret> reservationsEchues)
+	{
+		if (reservationsEchues == null || reservationsEchues.isEmpty()) return;
+		
+		Collection<Long> reservationsIDs = new ArrayList<Long>();
+		
+		for (Pret reservation : reservationsEchues)
+		{
+			reservationsIDs.add(reservation.getId());
+		}
+		
+		RestTemplate restTemplate = restTemplateService.buildRestTemplate();
+		
+		restTemplate.postForObject(
+				properties.apiUrl() + "/reservations/annuler",
 				reservationsIDs, ResponseEntity.class);
 	}
 }
