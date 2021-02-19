@@ -58,6 +58,13 @@ public class PropertiesConfigurationService
 		return _emailSubject;
 	}
 	
+	@Value("${app.param.reservation.emailsubject}") 
+	private String _emailReservationSubject="";
+	public String emailReservationSubject()
+	{
+		return _emailReservationSubject;
+	}
+	
 	@Value("${spring.mail.host}")
 	private String _host="";
 	public String host()
