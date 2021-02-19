@@ -21,4 +21,9 @@ public interface PretService
 	 * @return La liste des abonnés avec leurs prets respectifs
 	 */
 	public Collection<Utilisateur> pretsParAbonne(Collection<Pret> prets);
+	/**
+	 * Retourne une liste de réservations disponibles
+	 * @return La liste des réservations
+	 */
+	public Collection<Pret> listeReservationsDisponibles();
 }

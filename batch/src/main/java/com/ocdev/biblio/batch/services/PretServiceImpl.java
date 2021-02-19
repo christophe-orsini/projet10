@@ -77,4 +77,24 @@ public class PretServiceImpl implements PretService
 		
 		return utilisateurs.values();
 	}
+
+	@Override
+	public Collection<Pret> listeReservationsDisponibles()
+	{
+		RestTemplate restTemplate = restTemplateService.buildRestTemplate();
+			
+		ParameterizedTypeReference<Collection<Pret>> responseType = 
+				new ParameterizedTypeReference<Collection<Pret>>() { };
+				
+		ResponseEntity<Collection<Pret>> result = restTemplate.exchange(
+				properties.apiUrl() + "reservations/disponible", 
+				HttpMethod.GET, null, responseType);
+		
+		if (result.getStatusCode() != HttpStatus.OK)
+		{
+			return new ArrayList<Pret>();
+		}
+		
+		return result.getBody();
+	}	
 }
