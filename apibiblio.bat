@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 chcp 65001
 cls
 if not exist apibiblio\target\apibiblio-1.0.7.jar (

@@ -3,6 +3,7 @@ package com.ocdev.biblio.apibiblio.services;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.ocdev.biblio.apibiblio.criterias.OuvrageCriteria;
+import com.ocdev.biblio.apibiblio.dto.OuvrageConsultDto;
 import com.ocdev.biblio.apibiblio.dto.OuvrageCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
@@ -33,10 +34,10 @@ public interface OuvrageService
 	/**
 	 * Méthode permettant d'obtenir les détails d'un ouvrage.
 	 * 
-	 * @param id L'id de l'ouvrage
+	 * @param ouvrageId L'id de l'ouvrage
+	 * @param utilisateurId L'id de l'utilisateur
 	 * @return L'ouvrage trouvé
 	 * @throws EntityNotFoundException levée si l'id n'existe pas
 	 */
-	public Ouvrage consulterOuvrage(Long id) throws EntityNotFoundException;
-
+	public OuvrageConsultDto consulterOuvrage(long ouvrageId, long utilisateurId) throws EntityNotFoundException;
 }

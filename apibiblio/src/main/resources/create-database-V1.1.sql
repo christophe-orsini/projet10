@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS `ouvrage` (
   `annee_edition` int(11) NOT NULL,
   `auteur` varchar(255) NOT NULL,
   `nbre_exemplaire` int(11) DEFAULT NULL,
+  `nbre_exemplaire_total` int(11) DEFAULT 0,
   `resume` varchar(255) DEFAULT NULL,
   `titre` varchar(255) NOT NULL,
   `theme_id` bigint(20) DEFAULT NULL,
@@ -36,8 +37,11 @@ CREATE TABLE IF NOT EXISTS `utilisateur` (
 
 CREATE TABLE IF NOT EXISTS `pret` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `date_debut` date NOT NULL,
-  `date_fin_prevu` date NOT NULL,
+  `date_heure_reservation` datetime DEFAULT NULL,
+  `date_heure_expiration` datetime DEFAULT NULL,
+  `email_envoye` tinyint(1) DEFAULT 0,
+  `date_debut` date DEFAULT NULL,
+  `date_fin_prevu` date DEFAULT NULL,
   `date_retour` date DEFAULT NULL,
   `periodes` int(11) DEFAULT NULL,
   `prolongations_possible` int(11) DEFAULT NULL,

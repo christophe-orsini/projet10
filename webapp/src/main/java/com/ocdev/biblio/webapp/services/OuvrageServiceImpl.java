@@ -1,5 +1,7 @@
 package com.ocdev.biblio.webapp.services;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -7,6 +9,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import com.ocdev.biblio.webapp.dto.OuvrageConsultDto;
 import com.ocdev.biblio.webapp.dto.OuvrageCriteria;
 import com.ocdev.biblio.webapp.dto.SearchOuvrageDto;
 import com.ocdev.biblio.webapp.objects.Ouvrage;
@@ -17,12 +21,14 @@ public class OuvrageServiceImpl implements OuvrageService
 {
 	@Autowired PropertiesConfigurationService properties;
 	@Autowired RestTemplateService restTemplateService;
-
+	@Autowired UtilisateurService utilisateurService;
+	
 	@Override
-	public Ouvrage getOuvrageById(Long id)
+	public OuvrageConsultDto getOuvrageById(Principal abonne, long ouvrageId)
 	{
+		long abonneId = utilisateurService.getAbonneId(abonne);
 	 	RestTemplate restTemplate = restTemplateService.buildRestTemplate();
-	 	return restTemplate.getForObject(properties.getApiUrl() + "ouvrages/" +  id, Ouvrage.class);
+	 	return restTemplate.getForObject(properties.getApiUrl() + "ouvrages/" +  ouvrageId + "/utilisateur/" + abonneId, OuvrageConsultDto.class);
 	}
 
 	@Override
