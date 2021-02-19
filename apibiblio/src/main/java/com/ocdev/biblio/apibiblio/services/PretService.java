@@ -107,4 +107,9 @@ public interface PretService
 	 * @throws NotAllowedException levée si la demande ne vient pas de l'emprunteur ou d'un employé
 	 */
 	public Pret retirerReservation(Long reservationId, Long utilisateurId) throws EntityNotFoundException, NotAllowedException;
+	/**
+	 * Retourne la liste des réservations disponibles.
+	 * @return La liste des réservations disponibles
+	 */
+	public Collection<Pret> reservationsDisponibles();
 }

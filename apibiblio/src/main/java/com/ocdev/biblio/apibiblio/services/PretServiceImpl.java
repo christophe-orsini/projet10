@@ -331,6 +331,11 @@ public class PretServiceImpl implements PretService
 		return pretRepository.save(reservation.get());
 	}
 	
+	@Override
+	public Collection<Pret> reservationsDisponibles()
+	{
+		return pretRepository.findAllReservationsDisponibles();
+	}
 	private void prochaineReservation(Long ouvrageId)
 	{
 		// Chercher la prochaine réservation
