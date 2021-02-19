@@ -1,6 +1,7 @@
 package com.ocdev.biblio.webapp.controllers;
 
 import java.security.Principal;
+import java.util.Calendar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -21,6 +22,12 @@ public class PretController
 	{
 		Page<Pret> response = pretService.listePrets(utilisateur, 0, 10);
 		model.addAttribute("prets", response.getContent());
+		Calendar today = Calendar.getInstance();
+		today.set(Calendar.HOUR_OF_DAY, 0);
+		today.set(Calendar.MINUTE, 0);
+		today.set(Calendar.SECOND, 0);
+		today.set(Calendar.MILLISECOND, 0);
+		model.addAttribute("today", today.getTime());
 		
 		return "/pret/listePrets";
 	}
