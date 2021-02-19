@@ -23,14 +23,20 @@ INSERT INTO ouvrage (id, auteur, nbre_exemplaire, nbre_exemplaire_total, resume,
 INSERT INTO utilisateur (id, email, nom, password, prenom, role) VALUES
 (1, "admin@biblio.fr", "Administrateur", "$2a$10$eZPZMT/NtMtoJANyhmIIUuRXakpVesT0wNMC4NHLd2r9UF/sVNFxu", NULL, "ROLE_ADMINISTRATEUR"),
 (2, "abonne@biblio.fr", "Abonné", "$2a$10$nxSnMr9s6rYmqCefnlWnse3R6FSMT8aYPVIeada9IAam2fNbfoW1a", NULL, "ROLE_ABONNE"),
-(3, "batch@biblio.fr", "Traitement Batch", "$2a$10$n4CJ9BhIyr90Qte2uOSJFeBaV/cXbDjrcRv7ryrCM27t462oGrpcm", NULL, "ROLE_BATCH");
+(3, "batch@biblio.fr", "Traitement Batch", "$2a$10$n4CJ9BhIyr90Qte2uOSJFeBaV/cXbDjrcRv7ryrCM27t462oGrpcm", NULL, "ROLE_BATCH"),
+(4, "abonne2@biblio.fr", "Abonné 2", "$2a$10$HiQbf4cxgm48/wry4X7AOeKqxNtJ3CCs5H6ycoubQAnIGhjEKeSkO", NULL, "ROLE_ABONNE");
 
 INSERT INTO pret (id, date_heure_reservation, date_debut, date_fin_prevu, date_retour, statut, abonne_id, ouvrage_id, periodes, prolongations_possible) VALUES
-(1, NULL, "2021-01-17", "2021-02-14", NULL, "EN_COURS", 1, 1, 1, 1),
-(2, NULL, "2020-12-06", "2021-01-31", NULL, "PROLONGE", 2, 2, 2, 0),
-(3, NULL, "2020-12-09", "2021-02-03", NULL, "PROLONGE", 3, 3, 2, 0),
-(4, NULL, "2021-01-05", "2021-02-02", NULL, "EN_COURS", 2, 4, 1, 1),
-(5, NULL, "2021-01-04", "2021-02-01", NULL, "EN_COURS", 3, 5, 0, 0),
-(6, "2021-01-06 15:29:52", NULL, NULL, NULL, "RESERVE", 1, 4, 0, 0),
-(7, "2021-01-18 10:53:07", NULL, NULL, NULL, "RESERVE", 2, 5, 0, 0),
-(8, "2021-01-06 15:29:53", NULL, NULL, NULL, "RESERVE", 3, 4, 0, 0);
+(1, NULL, "2021-01-31", "2021-02-28", NULL, "EN_COURS", 1, 1, 1, 1),
+(2, NULL, "2021-01-02", "2021-02-27", NULL, "PROLONGE", 2, 2, 2, 0),
+(3, NULL, "2020-12-21", "2021-02-15", NULL, "PROLONGE", 2, 3, 2, 0),
+(4, NULL, "2021-01-22", "2021-02-19", NULL, "EN_COURS", 2, 4, 1, 1),
+(5, NULL, "2021-01-21", "2021-02-18", NULL, "EN_COURS", 2, 5, 1, 1),
+(6, NULL, "2021-01-29", "2021-02-26", NULL, "EN_COURS", 1, 2, 1, 1);
+
+INSERT INTO pret (id, date_heure_reservation, date_heure_expiration, statut, abonne_id, ouvrage_id, periodes, prolongations_possible) VALUES
+(7, "2021-01-15 10:53:07", NULL, "RESERVE", 3, 3, 0, 0),
+(8, "2021-02-17 10:53:07", NULL, "RESERVE", 1, 3, 0, 0),
+(9, "2021-02-03 10:53:07", "2021-02-19 13:30:55", "DISPONIBLE", 1, 5, 0, 0);
+
+

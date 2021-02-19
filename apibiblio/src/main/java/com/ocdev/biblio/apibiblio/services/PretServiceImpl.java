@@ -352,7 +352,7 @@ public class PretServiceImpl implements PretService
 		// sauvegarde de l'ouvrage
 		ouvrageRepository.save(ouvrage);
 			
-		// Sauver=garder
+		// Sauvergarder
 		pretRepository.save(reservation.get());
 	}
 }

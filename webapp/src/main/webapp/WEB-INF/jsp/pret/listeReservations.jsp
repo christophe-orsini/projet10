@@ -29,17 +29,17 @@
 					<c:forEach items="${reservations}" var="reservation" varStatus="status">
 					<tr>
 						<td>${reservation.ouvrage.titre}</td>
-						<td class="text-center"><fmt:formatDate type="DATE" pattern="dd/MM/yyyy hh:mm" value="${reservation.dateHeureReservation}" /></td>
+						<td class="text-center"><fmt:formatDate type="DATE" pattern="dd/MM/yyyy HH:mm" value="${reservation.dateHeureReservation}" /></td>
 						<c:if test="${reservation.dateHeureExpiration == null}">
 							<td class="text-center">N° ${reservation.rang} dans le liste d'attente</td>
 							<td class="text-center">Prochaine : <fmt:formatDate type="DATE" pattern="dd/MM/yyyy" value="${reservation.dateDisponible}" /></td>
 						</c:if>
 						<c:if test="${reservation.dateHeureExpiration != null}">
 							<td class="text-center">Disponible</td>
-							<td class="text-center">Jusqu'au : <fmt:formatDate type="DATE" pattern="dd/MM/yyyy" value="${reservation.dateHeureExpiration}" /></td>
+							<td class="text-center">Jusqu'au : <fmt:formatDate type="DATE" pattern="dd/MM/yyyy HH:mm" value="${reservation.dateHeureExpiration}" /></td>
 						</c:if>
 						<td class="text-center">
-							<c:if test="${reservation.dateHeureExpiration != null}">
+							<c:if test="${reservation.dateHeureExpiration != null && reservation.dateHeureExpiration ge now}">
 								<a class="btn btn-primary ml-2" href="/abonne/retirerReservation/${reservation.id}" role="button">Retirer</a>
 							</c:if>
 							<a class="btn btn-primary ml-2" href="/abonne/annulerReservation/${reservation.id}" role="button">Annuler</a>
