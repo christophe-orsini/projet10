@@ -3,15 +3,12 @@ package com.ocdev.biblio.apibiblio.assemblers;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.ocdev.biblio.apibiblio.dao.OuvrageRepository;
 import com.ocdev.biblio.apibiblio.dto.OuvrageConsultDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 
 @Component
 public class OuvrageConsultDtoConverter implements IDtoConverter<Ouvrage, OuvrageConsultDto>
 {
-	@Autowired OuvrageRepository ouvrageRepository;
-
 	@Override
 	public Ouvrage convertDtoToEntity(OuvrageConsultDto dto)
 	{

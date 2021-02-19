@@ -30,7 +30,7 @@ public class OuvrageConsultDto implements Serializable
 	private String theme;
 	@ApiModelProperty(position = 8, value = "True si réservable")
 	private boolean reservable;
-	@ApiModelProperty(position = 9, value = "Date du prochainretour d'un exemplaire de l'ouvrage")
+	@ApiModelProperty(position = 9, value = "Date du prochain retour d'un exemplaire de l'ouvrage")
 	private Date prochainRetour;
 	@ApiModelProperty(position = 10, value = "Nombre de réservations en cours")
 	private int nbreReservations;
