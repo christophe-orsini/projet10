@@ -112,4 +112,9 @@ public interface PretService
 	 * @return La liste des réservations disponibles
 	 */
 	public Collection<Pret> reservationsDisponibles();
+	/**
+	 * Met à true le champs emailEnvoye et sauvegarde pour une liste de reservations
+	 * @param emailsEnvoyés
+	 */
+	void setEmailsEnvoyes(Collection<Long> reservationIDs);
 }

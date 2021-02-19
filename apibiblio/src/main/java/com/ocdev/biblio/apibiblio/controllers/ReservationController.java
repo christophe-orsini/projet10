@@ -122,3 +122,14 @@ public class ReservationController
 	}	}
 	}
 	
+	@ApiOperation(value = "Enregistrer l'envoi d'un email pour une liste de réservations", notes = "Enregistre l'envoi d'un email par le traitement batch lorsque une réservation est devenue disponible")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "L'envoi d'email est enregistré pour la liste"),
+			@ApiResponse(code = 403, message = "Authentification requise"),
+			})
+	@PostMapping(value ="/reservations/enregistrer/emails/envoyes", produces = "application/json")
+	public ResponseEntity<?> enregistrerEmailEnvoye(@Valid @RequestBody final Collection<Long> reservationsIDs)
+	{
+		pretService.setEmailsEnvoyes(reservationsIDs);
+		return ResponseEntity.status(HttpStatus.OK).build();
+	}

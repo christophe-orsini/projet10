@@ -336,6 +336,23 @@ public class PretServiceImpl implements PretService
 	{
 		return pretRepository.findAllReservationsDisponibles();
 	}
+	
+	@Override
+	@Transactional
+	public void setEmailsEnvoyes(Collection<Long> reservationIDs)
+	{
+		if (reservationIDs == null || reservationIDs.size() == 0) return;
+		
+		for (Long item : reservationIDs)
+		{
+			Optional<Pret> reservation = pretRepository.findById(item);
+			if (reservation.isPresent())
+			{
+				reservation.get().setEmailEnvoye(true);
+				pretRepository.save(reservation.get());	
+			}
+		}
+	}
 	private void prochaineReservation(Long ouvrageId)
 	{
 		// Chercher la prochaine réservation
