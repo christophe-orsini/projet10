@@ -353,6 +353,33 @@ public class PretServiceImpl implements PretService
 			}
 		}
 	}
+	
+	@Override
+	public void annulerReservations(Collection<Long> reservationIDs)
+	{
+		if (reservationIDs == null || reservationIDs.size() == 0) return;
+		
+		for (Long item : reservationIDs)
+		{
+			Optional<Pret> reservation = pretRepository.findById(item);
+			if (reservation.isPresent())
+			{
+				try
+				{
+					annulerReservation(reservation.get().getId(), reservation.get().getAbonne().getId());	
+				} 
+				catch (EntityNotFoundException e)
+				{
+					// Ne devrait pas se produire car la réservation est persistée
+				}
+				catch (NotAllowedException e)
+				{
+					// Ne devrait pas se produire car la réservation est annulée par son auteur
+				}
+			}
+		}
+	}
+	
 	private void prochaineReservation(Long ouvrageId)
 	{
 		// Chercher la prochaine réservation

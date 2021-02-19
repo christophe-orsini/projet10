@@ -117,4 +117,11 @@ public interface PretService
 	 * @param emailsEnvoyés
 	 */
 	void setEmailsEnvoyes(Collection<Long> reservationIDs);
+	/**
+	 * Annule une liste de réservations échues
+	 * @param reservationsEchues
+	 * @throws EntityNotFoundException
+	 * @throws NotAllowedException
+	 */
+	void annulerReservations(Collection<Long> reservationIDs);
 }

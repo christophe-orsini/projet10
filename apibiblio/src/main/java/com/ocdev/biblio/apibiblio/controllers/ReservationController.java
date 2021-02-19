@@ -119,7 +119,6 @@ public class ReservationController
 	{
 		Collection<Pret> result = pretService.reservationsDisponibles();
 		return new ResponseEntity<Collection<Pret>>(result, HttpStatus.OK);
-	}	}
 	}
 	
 	@ApiOperation(value = "Enregistrer l'envoi d'un email pour une liste de réservations", notes = "Enregistre l'envoi d'un email par le traitement batch lorsque une réservation est devenue disponible")
@@ -133,3 +132,16 @@ public class ReservationController
 		pretService.setEmailsEnvoyes(reservationsIDs);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
+
+	@ApiOperation(value = "Annuler une liste de réservations échues", notes = "Annule une liste de réservations échues")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "La liste des réservations est annulée"),
+			@ApiResponse(code = 403, message = "Authentification requise"),
+			})
+	@PostMapping(value ="/reservations/annuler", produces = "application/json")
+	public ResponseEntity<?> annulerReservations(@Valid @RequestBody final Collection<Long> reservationsIDs)
+	{
+		pretService.annulerReservations(reservationsIDs);
+		return ResponseEntity.status(HttpStatus.OK).build();
+	}
+}
