@@ -1,5 +1,8 @@
 package com.ocdev.biblio.apibiblio.services;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -118,18 +121,15 @@ public class PretServiceImpl implements PretService
 		
 		// verifier si le pret peut etre prolongé
 		if (pret.get().getProlongationsPossible() <= 0) throw new DelayLoanException("Le prêt ne peut plus être prolongé");
-		
+			
 		// verifier si le pret est en retard
-		Calendar ceSoirMinuit = Calendar.getInstance();
-		ceSoirMinuit.set(Calendar.HOUR_OF_DAY, 0);
-		ceSoirMinuit.set(Calendar.MINUTE, 0);
-		ceSoirMinuit.add(Calendar.DAY_OF_MONTH, 1); 
-		if (pret.get().getDateFinPrevu().before(ceSoirMinuit.getTime())) throw new DelayLoanException("Le prêt ne peut plus être prolongé");
+		LocalDate now = LocalDate.now();
+		LocalDate finPrevu = Instant.ofEpochMilli(pret.get().getDateFinPrevu().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+		if (finPrevu.isBefore(now)) throw new DelayLoanException("Le prêt ne peut plus être prolongé");
 		
 		// verifier si le demandeur est l'emprunteur ou un employé
 		Utilisateur utilisateur = pret.get().getAbonne();
-		if (utilisateur.getRole() == Role.ROLE_ABONNE && utilisateur.getId() != utilisateurId)
-			throw new NotAllowedException("Vous ne pouvez pas prolonger ce prêt. Vous n'etes pas l'emprunteur");
+		if (utilisateur.getRole() == Role.ROLE_ABONNE && utilisateur.getId() != utilisateurId) throw new NotAllowedException("Vous ne pouvez pas prolonger ce prêt. Vous n'etes pas l'emprunteur");
 		
 		// prolongation
 		Calendar c = Calendar.getInstance();

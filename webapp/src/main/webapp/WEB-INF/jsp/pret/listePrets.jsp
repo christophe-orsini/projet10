@@ -18,24 +18,23 @@
 				<thead>
 					<tr>
 						<th>Titre</th>
-						<th>Emprunté le </th>
-						<th>Date limite de retour</th>
+						<th class="text-center">Emprunté le </th>
+						<th class="text-center">Date limite de retour</th>
 						<th></th>
 					</tr>
 				</thead>	
 				<tbody>
-					<jsp:useBean id="now" class="java.util.Date"/>
 					<c:forEach items="${prets}" var="pret" varStatus="status">
-					<tr>
-						<td>${pret.ouvrage.titre}</td>
+					<tr class="text-center">
+						<td class="text-left">${pret.ouvrage.titre}</td>
 						<td><fmt:formatDate type="DATE" pattern="dd/MM/yyyy" value="${pret.dateDebut}" /></td>
 						<td><fmt:formatDate type="DATE" pattern="dd/MM/yyyy" value="${pret.dateFinPrevu}" /></td>
 						<td>
-							<c:if test="${pret.prolongationsPossible > 0 && pret.dateFinPrevu >= now}">
+							<c:if test="${pret.prolongationsPossible > 0 && pret.dateFinPrevu gt today}">
 								<a class="btn btn-primary ml-2" href="/abonne/prolongerPret/${pret.id}" 
 									role="button">Prolonger</a>
 							</c:if>
-							<c:if test="${pret.dateFinPrevu < now}">En retard</c:if>
+							<c:if test="${pret.dateFinPrevu lt today}">En retard</c:if>
 						</td>
 					</tr>
 					</c:forEach>
