@@ -1,4 +1,4 @@
-package com.ocdev.biblio.apibiblio.services;
+ package com.ocdev.biblio.apibiblio.services;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,7 +18,6 @@ import com.ocdev.biblio.apibiblio.assemblers.IDtoConverter;
 import com.ocdev.biblio.apibiblio.dao.OuvrageRepository;
 import com.ocdev.biblio.apibiblio.dao.PretRepository;
 import com.ocdev.biblio.apibiblio.dao.UtilisateurRepository;
-import com.ocdev.biblio.apibiblio.dto.PretDto;
 import com.ocdev.biblio.apibiblio.dto.ReservationDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.entities.Pret;
@@ -36,11 +35,22 @@ import com.ocdev.biblio.apibiblio.utils.AppSettings;
 @Service
 public class PretServiceImpl implements PretService
 {
-	@Autowired PretRepository pretRepository;
-	@Autowired OuvrageRepository ouvrageRepository;
-	@Autowired UtilisateurRepository utilisateurRepository;
-	@Autowired IDtoConverter<Pret, PretDto> pretConverter;
-	@Autowired private IDtoConverter<Pret, ReservationDto> reservationConverter;
+	private PretRepository pretRepository;
+	private OuvrageRepository ouvrageRepository;
+	private UtilisateurRepository utilisateurRepository;
+	private IDtoConverter<Pret, ReservationDto> reservationConverter;
+	
+	public PretServiceImpl(
+			@Autowired PretRepository pretRepository,
+			@Autowired OuvrageRepository ouvrageRepository,
+			@Autowired UtilisateurRepository utilisateurRepository,
+			@Autowired IDtoConverter<Pret, ReservationDto> reservationConverter)
+	{
+		this.pretRepository = pretRepository;
+		this.ouvrageRepository = ouvrageRepository;
+		this.utilisateurRepository = utilisateurRepository;
+		this.reservationConverter = reservationConverter;
+	}
 	
 	@Override
 	@Transactional
