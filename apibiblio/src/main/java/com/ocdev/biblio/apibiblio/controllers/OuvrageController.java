@@ -39,10 +39,11 @@ public class OuvrageController
 	@ApiResponses(value = {
 			@ApiResponse(code = 201, message = "L'ouvrage est correctement créé"),
 			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 404, message = "Le thème n'existe pas"),
 			@ApiResponse(code = 460, message = "Un ouvrage avec le même titre existe déjà")
 			})
 	@PostMapping(value ="/ouvrages", produces = "application/json")
-	public ResponseEntity<Ouvrage> ajouterOuvrage(@Valid @RequestBody final OuvrageCreateDto ouvrageCreateDto) throws AlreadyExistsException
+	public ResponseEntity<Ouvrage> ajouterOuvrage(@Valid @RequestBody final OuvrageCreateDto ouvrageCreateDto) throws AlreadyExistsException, EntityNotFoundException
 	{
 		Ouvrage result = ouvrageService.creer(ouvrageCreateDto);
 		return new ResponseEntity<Ouvrage>(result, HttpStatus.CREATED);
