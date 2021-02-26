@@ -18,10 +18,11 @@ import com.ocdev.biblio.apibiblio.dao.UtilisateurRepository;
 import com.ocdev.biblio.apibiblio.dto.ReservationDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.entities.Pret;
-import com.ocdev.biblio.apibiblio.entities.Statut;
+import com.ocdev.biblio.apibiblio.entities.Role;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
+import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 import com.ocdev.biblio.apibiblio.errors.NotEnoughCopiesException;
 
 @ExtendWith(MockitoExtension.class)
@@ -182,7 +183,7 @@ class PretServiceImplTest
 	void retournerOuvrage_ShouldRaiseEntityNotFoundException_WhenPretNotExists()
 	{
 		//arrange
-		Mockito.<Optional<Pret>>when(pretRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.empty());
 		
 		// act & assert
 		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
