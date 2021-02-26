@@ -28,13 +28,29 @@ import com.ocdev.biblio.apibiblio.utils.AppSettings;
 @Service
 public class OuvrageServiceImpl implements OuvrageService
 {
-	@Autowired private OuvrageRepository ouvrageRepository;
-	@Autowired private ThemeRepository themeRepository;
-	@Autowired private UtilisateurRepository utilisateurRepository;
-	@Autowired private PretRepository pretRepository;
-	@Autowired private IDtoConverter<Ouvrage, OuvrageCreateDto> ouvrageConverter;
-	@Autowired private IDtoConverter<Ouvrage, OuvrageConsultDto> ouvrageConsultConverter;
+	private OuvrageRepository ouvrageRepository;
+	private ThemeRepository themeRepository;
+	private UtilisateurRepository utilisateurRepository;
+	private PretRepository pretRepository;
+	private IDtoConverter<Ouvrage, OuvrageCreateDto> ouvrageCreateConverter;
+	private IDtoConverter<Ouvrage, OuvrageConsultDto> ouvrageConsultConverter;
 	
+	public OuvrageServiceImpl(
+			@Autowired OuvrageRepository ouvrageRepository,
+			@Autowired ThemeRepository themeRepository,
+			@Autowired UtilisateurRepository utilisateurRepository,
+			@Autowired PretRepository pretRepository,
+			@Autowired IDtoConverter<Ouvrage, OuvrageCreateDto> ouvrageCreateConverter,
+			@Autowired IDtoConverter<Ouvrage, OuvrageConsultDto> ouvrageConsultConverter)
+	{
+		this.ouvrageRepository = ouvrageRepository;
+		this.themeRepository = themeRepository;
+		this.utilisateurRepository = utilisateurRepository;
+		this.pretRepository = pretRepository;
+		this.ouvrageCreateConverter = ouvrageCreateConverter;
+		this.ouvrageConsultConverter = ouvrageConsultConverter;
+	}
+
 	@Override
 	public Ouvrage creer(OuvrageCreateDto ouvrageCreateDto) throws AlreadyExistsException, EntityNotFoundException
 	{
@@ -55,7 +71,7 @@ public class OuvrageServiceImpl implements OuvrageService
 			throw new EntityNotFoundException("Ce thème n'existe pas");	
 		}
 		
-		Ouvrage ouvrage = ouvrageConverter.convertDtoToEntity(ouvrageCreateDto);
+		Ouvrage ouvrage = ouvrageCreateConverter.convertDtoToEntity(ouvrageCreateDto);
 				
 		// log
 		return ouvrageRepository.save(ouvrage);
