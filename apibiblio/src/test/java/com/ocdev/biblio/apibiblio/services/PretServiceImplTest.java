@@ -1,5 +1,7 @@
 package com.ocdev.biblio.apibiblio.services;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 
@@ -21,6 +23,7 @@ import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.entities.Role;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
+import com.ocdev.biblio.apibiblio.errors.DelayLoanException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
 import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 import com.ocdev.biblio.apibiblio.errors.NotEnoughCopiesException;
@@ -336,5 +339,137 @@ class PretServiceImplTest
 		{
 			pretServiceUnderTest.prolonger(1L, 2L);
 		}).withMessage("Le prêt n'existe pas");
+	}
+	
+	@Test
+	void prolonger_ShouldRaiseDelayLoanException_WhenPretNoMoreProlongation()
+	{
+		//arrange
+		Pret pret = new Pret();
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		// act & assert
+		assertThatExceptionOfType(DelayLoanException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.prolonger(1L, 2L);
+		}).withMessage("Le prêt ne peut plus être prolongé");
+	}
+	
+	@Test
+	void prolonger_ShouldRaiseDelayLoanException_WhenRetard()
+	{
+		//arrange
+		Pret pret = new Pret();
+		pret.setProlongationsPossible(1);
+		Calendar c = Calendar.getInstance();
+		c.setTime(new Date());
+		c.add(Calendar.DAY_OF_MONTH, -1);
+		pret.setDateFinPrevu(c.getTime());
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		// act & assert
+		assertThatExceptionOfType(DelayLoanException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.prolonger(1L, 2L);
+		}).withMessage("Le prêt ne peut plus être prolongé car il est en retard");
+	}
+	
+	@Test
+	void prolonger_ShouldRaiseEntityNotFoundException_WhenUtilisateurNotExistsRetard()
+	{
+		//arrange
+		Pret pret = new Pret();
+		pret.setProlongationsPossible(1);
+		pret.setDateFinPrevu(new Date());
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+		
+		// act & assert
+		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.prolonger(1L, 2L);
+		}).withMessage("Le demandeur n'existe pas");
+	}
+	
+	@Test
+	void prolonger_ShouldRaiseNotAllowedException_WhenAbonneIsNotUtilisateur()
+	{
+		//arrange
+		Pret pret = new Pret();
+		pret.setProlongationsPossible(1);
+		pret.setDateFinPrevu(new Date());
+		Utilisateur pretAbonne = new Utilisateur();
+		pretAbonne.setId(2L);
+		pretAbonne.setRole(Role.ROLE_ABONNE);
+		pret.setAbonne(pretAbonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(9L);
+		abonne.setRole(Role.ROLE_ABONNE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		// act & assert
+		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.prolonger(1L, abonne.getId());
+		}).withMessage("Vous ne pouvez pas prolonger ce prêt. Vous n'etes pas l'emprunteur");
+	}
+	
+	@Test
+	void prolonger_ShouldSuccess() throws EntityNotFoundException, DelayLoanException, NotAllowedException
+	{
+		//arrange
+		Pret pret = new Pret();
+		pret.setProlongationsPossible(1);
+		pret.setDateDebut(new Date());
+		pret.setDateFinPrevu(new Date());
+		Utilisateur pretAbonne = new Utilisateur();
+		pretAbonne.setId(2L);
+		pretAbonne.setRole(Role.ROLE_ABONNE);
+		pret.setAbonne(pretAbonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(2L);
+		abonne.setRole(Role.ROLE_ABONNE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Mockito.when(pretRepositoryMock.save(Mockito.any(Pret.class))).thenReturn(pret);
+		
+		// act
+		pretServiceUnderTest.prolonger(1L,  abonne.getId());
+		
+		// assert
+		Mockito.verify(pretRepositoryMock, Mockito.times(1)).save(Mockito.any(Pret.class));
+	}
+	
+	@Test
+	void prolonger_ShouldSuccess_WhenUtilisateurIsEmploye() throws EntityNotFoundException, DelayLoanException, NotAllowedException
+	{
+		//arrange
+		Pret pret = new Pret();
+		pret.setProlongationsPossible(1);
+		pret.setDateDebut(new Date());
+		pret.setDateFinPrevu(new Date());
+		Utilisateur pretAbonne = new Utilisateur();
+		pretAbonne.setId(2L);
+		pretAbonne.setRole(Role.ROLE_ABONNE);
+		pret.setAbonne(pretAbonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(9L);
+		abonne.setRole(Role.ROLE_EMPLOYE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Mockito.when(pretRepositoryMock.save(Mockito.any(Pret.class))).thenReturn(pret);
+		
+		// act
+		pretServiceUnderTest.prolonger(1L,  abonne.getId());
+		
+		// assert
+		Mockito.verify(pretRepositoryMock, Mockito.times(1)).save(Mockito.any(Pret.class));
 	}
 }
