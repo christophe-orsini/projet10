@@ -193,17 +193,148 @@ class PretServiceImplTest
 	}
 	
 	@Test
-	void retournerOuvrage_ShouldRaiseEntityNotFoundException_WhenPretNotActive()
+	void retournerOuvrage_ShouldRaiseEntityNotFoundException_WhenAbonneNotExists()
 	{
 		//arrange
 		Pret pret = new Pret();
-		pret.setStatut(Statut.DISPONIBLE);
-		Mockito.<Optional<Pret>>when(pretRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 		
 		// act & assert
 		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
 		{
 			pretServiceUnderTest.retournerOuvrage(1L, 2L);
+		}).withMessage("Le demandeur n'existe pas");
+	}
+	
+	@Test
+	void retournerOuvrage_ShouldRaiseNotAllowedException_WhenAbonneIsNotUtilisateur()
+	{
+		//arrange
+		Pret pret = new Pret();
+		Utilisateur pretAbonne = new Utilisateur();
+		pretAbonne.setId(2L);
+		pretAbonne.setRole(Role.ROLE_ABONNE);
+		pret.setAbonne(pretAbonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(9L);
+		abonne.setRole(Role.ROLE_ABONNE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		// act & assert
+		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.retournerOuvrage(1L, abonne.getId());
+		}).withMessage("Vous ne pouvez pas retourner ce prêt. Vous n'etes pas l'emprunteur");
+	}
+	
+	@Test
+	void retournerOuvrage_ShouldSuccess_WhenAbonneIsUtilisateur() throws EntityNotFoundException, NotAllowedException
+	{
+		//arrange
+		Pret pret = new Pret();
+		Utilisateur pretAbonne = new Utilisateur();
+		pretAbonne.setId(2L);
+		pretAbonne.setRole(Role.ROLE_ABONNE);
+		pret.setAbonne(pretAbonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(2L);
+		abonne.setRole(Role.ROLE_ABONNE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Ouvrage ouvrage = new Ouvrage();
+		ouvrage.setId(5L);
+		Mockito.when(ouvrageRepositoryMock.save(Mockito.any(Ouvrage.class))).thenReturn(ouvrage);
+		
+		pret.setOuvrage(ouvrage);
+		Mockito.when(pretRepositoryMock.save(Mockito.any(Pret.class))).thenReturn(pret);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findNextReservationsByOuvrageId(Mockito.anyLong())).thenReturn(Optional.empty());
+		
+		// act
+		pretServiceUnderTest.retournerOuvrage(1L,  abonne.getId());
+		
+		// assert
+		Mockito.verify(pretRepositoryMock, Mockito.times(1)).findNextReservationsByOuvrageId(Mockito.anyLong());
+	}
+	
+	@Test
+	void retournerOuvrage_ShouldSuccess_WhenUtilisateurIsNotAbonne() throws EntityNotFoundException, NotAllowedException
+	{
+		//arrange
+		Pret pret = new Pret();
+		Utilisateur pretAbonne = new Utilisateur();
+		pretAbonne.setId(2L);
+		pretAbonne.setRole(Role.ROLE_ABONNE);
+		pret.setAbonne(pretAbonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(9L);
+		abonne.setRole(Role.ROLE_EMPLOYE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Ouvrage ouvrage = new Ouvrage();
+		ouvrage.setId(5L);
+		Mockito.when(ouvrageRepositoryMock.save(Mockito.any(Ouvrage.class))).thenReturn(ouvrage);
+		
+		pret.setOuvrage(ouvrage);
+		Mockito.when(pretRepositoryMock.save(Mockito.any(Pret.class))).thenReturn(pret);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findNextReservationsByOuvrageId(Mockito.anyLong())).thenReturn(Optional.empty());
+		
+		// act
+		pretServiceUnderTest.retournerOuvrage(1L,  abonne.getId());
+		
+		// assert
+		Mockito.verify(pretRepositoryMock, Mockito.times(1)).findNextReservationsByOuvrageId(Mockito.anyLong());
+	}
+	
+	@Test
+	void prochaineReservation_ShouldSuccess() throws EntityNotFoundException, NotAllowedException
+	{
+		//arrange
+		Pret pret = new Pret();
+		Utilisateur pretAbonne = new Utilisateur();
+		pretAbonne.setId(2L);
+		pretAbonne.setRole(Role.ROLE_ABONNE);
+		pret.setAbonne(pretAbonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(2L);
+		abonne.setRole(Role.ROLE_ABONNE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Ouvrage ouvrage = new Ouvrage();
+		ouvrage.setId(5L);
+		Mockito.when(ouvrageRepositoryMock.save(Mockito.any(Ouvrage.class))).thenReturn(ouvrage);
+		
+		pret.setOuvrage(ouvrage);
+		Mockito.when(pretRepositoryMock.save(Mockito.any(Pret.class))).thenReturn(pret);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findNextReservationsByOuvrageId(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		// act
+		pretServiceUnderTest.retournerOuvrage(1L,  abonne.getId());
+		
+		// assert
+		Mockito.verify(pretRepositoryMock, Mockito.times(2)).save(Mockito.any(Pret.class));
+		Mockito.verify(ouvrageRepositoryMock, Mockito.times(2)).save(Mockito.any(Ouvrage.class));
+	}
+	
+	@Test
+	void prolonger_ShouldRaiseEntityNotFoundException_WhenPretNotExists()
+	{
+		//arrange
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.empty());
+		
+		// act & assert
+		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.prolonger(1L, 2L);
 		}).withMessage("Le prêt n'existe pas");
 	}
 }

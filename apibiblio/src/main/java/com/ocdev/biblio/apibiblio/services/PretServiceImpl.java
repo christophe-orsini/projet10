@@ -144,7 +144,7 @@ public class PretServiceImpl implements PretService
 	@Override
 	public Pret prolonger(Long pretId, Long utilisateurId, String requesterName) throws EntityNotFoundException, DelayLoanException, NotAllowedException
 	{
-		Optional<Pret> pret = pretRepository.findById(pretId);
+		Optional<Pret> pret = pretRepository.findByIdAndEnPret(pretId);
 		if (!pret.isPresent()) throw new EntityNotFoundException("Le prêt n'existe pas");
 		
 		// verifier si le pret peut etre prolongé
