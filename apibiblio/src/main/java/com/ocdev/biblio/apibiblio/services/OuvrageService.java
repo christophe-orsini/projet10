@@ -21,8 +21,9 @@ public interface OuvrageService
 	 * @param ouvrageCreateDto Le DTO de l'ouvrage à créer
 	 * @return L'ouvrage créé
 	 * @throws AlreadyExistsException levée si le titre existe déjà
+	 * @throws EntityNotFoundException levée si le thème n'existe pas
 	 */
-	public Ouvrage creer(OuvrageCreateDto ouvrageCreateDto) throws AlreadyExistsException;
+	public Ouvrage creer(OuvrageCreateDto ouvrageCreateDto) throws AlreadyExistsException, EntityNotFoundException;
 	/**
 	 * Méthode permettant de rechercher des ouvrages en fonction de critères.
 	 * 

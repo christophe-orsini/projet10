@@ -11,11 +11,13 @@ import com.ocdev.biblio.apibiblio.criterias.OuvrageCriteria;
 import com.ocdev.biblio.apibiblio.criterias.OuvrageSpecification;
 import com.ocdev.biblio.apibiblio.dao.OuvrageRepository;
 import com.ocdev.biblio.apibiblio.dao.PretRepository;
+import com.ocdev.biblio.apibiblio.dao.ThemeRepository;
 import com.ocdev.biblio.apibiblio.dao.UtilisateurRepository;
 import com.ocdev.biblio.apibiblio.dto.OuvrageConsultDto;
 import com.ocdev.biblio.apibiblio.dto.OuvrageCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.entities.Pret;
+import com.ocdev.biblio.apibiblio.entities.Theme;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
@@ -25,13 +27,14 @@ import com.ocdev.biblio.apibiblio.utils.AppSettings;
 public class OuvrageServiceImpl implements OuvrageService
 {
 	@Autowired private OuvrageRepository ouvrageRepository;
+	@Autowired private ThemeRepository themeRepository;
 	@Autowired private UtilisateurRepository utilisateurRepository;
 	@Autowired private PretRepository pretRepository;
 	@Autowired private IDtoConverter<Ouvrage, OuvrageCreateDto> ouvrageConverter;
 	@Autowired private IDtoConverter<Ouvrage, OuvrageConsultDto> ouvrageConsultConverter;
 	
 	@Override
-	public Ouvrage creer(OuvrageCreateDto ouvrageCreateDto) throws AlreadyExistsException
+	public Ouvrage creer(OuvrageCreateDto ouvrageCreateDto) throws AlreadyExistsException, EntityNotFoundException
 	{
 		Optional<Ouvrage> ouvrageExists = ouvrageRepository.findByTitreIgnoreCase(ouvrageCreateDto.getTitre());
 		if (ouvrageExists.isPresent())
@@ -41,8 +44,17 @@ public class OuvrageServiceImpl implements OuvrageService
 			throw new AlreadyExistsException("Un ouvrage avec le même titre existe déjà");
 		}
 		
-		Ouvrage ouvrage = ouvrageConverter.convertDtoToEntity(ouvrageCreateDto);
+		// Controle du theme
+		Optional<Theme> theme = themeRepository.findById(ouvrageCreateDto.getTheme());
+		if (!theme.isPresent())
+		{
+			// le theme n'existe pas
+			// log
+			throw new EntityNotFoundException("Ce thème n'existe pas");	
+		}
 		
+		Ouvrage ouvrage = ouvrageConverter.convertDtoToEntity(ouvrageCreateDto);
+				
 		// log
 		return ouvrageRepository.save(ouvrage);
 	}
