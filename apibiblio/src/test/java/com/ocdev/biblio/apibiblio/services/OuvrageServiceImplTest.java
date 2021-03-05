@@ -28,10 +28,12 @@ import com.ocdev.biblio.apibiblio.dto.OuvrageConsultDto;
 import com.ocdev.biblio.apibiblio.dto.OuvrageCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.entities.Pret;
+import com.ocdev.biblio.apibiblio.entities.Role;
 import com.ocdev.biblio.apibiblio.entities.Theme;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
+import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 
 @ExtendWith(MockitoExtension.class)
 class OuvrageServiceImplTest
@@ -143,7 +145,7 @@ class OuvrageServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
 		{
-			ouvrageServiceUnderTest.consulterOuvrage(1L, 2L);
+			ouvrageServiceUnderTest.consulterOuvrage(1L, 2L, "");
 		}).withMessage("L'ouvrage n'existe pas");
 	}
 	
@@ -159,12 +161,12 @@ class OuvrageServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
 		{
-			ouvrageServiceUnderTest.consulterOuvrage(1L, 2L);
+			ouvrageServiceUnderTest.consulterOuvrage(1L, 2L, "");
 		}).withMessage("L'utilisateur n'existe pas");
 	}
 	
 	@Test
-	void consulterOuvrage_ShouldReturnProchainRetourToday_WhenNoPret() throws EntityNotFoundException
+	void consulterOuvrage_ShouldRaiseNotAllowedException_WhenRequesterNotExists()
 	{
 		// arrange
 		Ouvrage  ouvrage = new Ouvrage();
@@ -172,6 +174,51 @@ class OuvrageServiceImplTest
 		
 		Utilisateur utilisateur = new Utilisateur();
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(utilisateur));
+
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty());
+
+		// act & assert
+		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		{
+			ouvrageServiceUnderTest.consulterOuvrage(1L, 2L, "");
+		}).withMessage("Vous n'etes pas correctement authentifié");
+	}
+	
+	@Test
+	void consulterOuvrage_ShouldRaiseNotAllowedException_WhenRequesterIsNotAbonne()
+	{
+		// arrange
+		Ouvrage  ouvrage = new Ouvrage();
+		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
+		
+		Utilisateur utilisateur = new Utilisateur();
+		utilisateur.setEmail("abonne@biblio.fr");
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(utilisateur));
+
+		Utilisateur requester = new Utilisateur();
+		requester.setEmail("dummy@domain.tld");
+		requester.setRole(Role.ROLE_ABONNE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(requester));
+
+		// act & assert
+		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		{
+			ouvrageServiceUnderTest.consulterOuvrage(1L, 2L, requester.getEmail());
+		}).withMessage("Vous ne pouvez pas consulter cet ouvrage. Vous n'etes pas l'abonné");
+	}
+	
+	@Test
+	void consulterOuvrage_ShouldReturnProchainRetourToday_WhenNoPret() throws EntityNotFoundException, NotAllowedException
+	{
+		// arrange
+		Ouvrage  ouvrage = new Ouvrage();
+		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
+		
+		Utilisateur utilisateur = new Utilisateur();
+		utilisateur.setEmail("dummy@domain.tld");
+		utilisateur.setRole(Role.ROLE_ADMINISTRATEUR);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(utilisateur));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(utilisateur));
 		
 		OuvrageConsultDto ouvrageDto = new OuvrageConsultDto();
 		Date date = new Date();
@@ -183,7 +230,7 @@ class OuvrageServiceImplTest
 		Mockito.when(pretRepositoryMock.findAllReservationsByOuvrageId(Mockito.anyLong())).thenReturn(new ArrayList<Pret>());
 		
 		// act
-		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L);
+		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L, utilisateur.getEmail());
 
 		// assert
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -192,14 +239,17 @@ class OuvrageServiceImplTest
 	}
 	
 	@Test
-	void consulterOuvrage_ShouldProchainRetourEqualsPretRetour_WhenPretExists() throws EntityNotFoundException
+	void consulterOuvrage_ShouldProchainRetourEqualsPretRetour_WhenPretExists() throws EntityNotFoundException, NotAllowedException
 	{
 		// arrange
 		Ouvrage  ouvrage = new Ouvrage();
 		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
 		
 		Utilisateur utilisateur = new Utilisateur();
+		utilisateur.setEmail("dummy@domain.tld");
+		utilisateur.setRole(Role.ROLE_ADMINISTRATEUR);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(utilisateur));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(utilisateur));
 		
 		OuvrageConsultDto ouvrageDto = new OuvrageConsultDto();
 		@SuppressWarnings("deprecation")
@@ -214,7 +264,7 @@ class OuvrageServiceImplTest
 		Mockito.when(pretRepositoryMock.findAllReservationsByOuvrageId(Mockito.anyLong())).thenReturn(new ArrayList<Pret>());
 		
 		// act
-		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L);
+		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L, utilisateur.getEmail());
 
 		// assert
 		assertThat(actual.getProchainRetour()).isEqualTo(date);
@@ -222,14 +272,17 @@ class OuvrageServiceImplTest
 	}
 	
 	@Test
-	void consulterOuvrage_ShouldReturnNbreReservations_WhenReservationExists() throws EntityNotFoundException
+	void consulterOuvrage_ShouldReturnNbreReservations_WhenReservationExists() throws EntityNotFoundException, NotAllowedException
 	{
 		// arrange
 		Ouvrage  ouvrage = new Ouvrage();
 		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
 		
 		Utilisateur utilisateur = new Utilisateur();
+		utilisateur.setEmail("dummy@domain.tld");
+		utilisateur.setRole(Role.ROLE_ADMINISTRATEUR);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(utilisateur));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(utilisateur));
 		
 		OuvrageConsultDto ouvrageDto = new OuvrageConsultDto();
 		Mockito.when(ouvrageConsultConverterMock.convertEntityToDto(Mockito.any(Ouvrage.class))).thenReturn(ouvrageDto);
@@ -241,7 +294,7 @@ class OuvrageServiceImplTest
 		Mockito.when(pretRepositoryMock.findAllReservationsByOuvrageId(Mockito.anyLong())).thenReturn(prets);
 		
 		// act
-		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L);
+		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L, utilisateur.getEmail());
 
 		// assert
 		assertThat(actual.getNbreReservations()).isEqualTo(1);
@@ -250,7 +303,7 @@ class OuvrageServiceImplTest
 	}
 	
 	@Test
-	void consulterOuvrage_ShouldNotBeReservable_WhenDisponible() throws EntityNotFoundException
+	void consulterOuvrage_ShouldNotBeReservable_WhenDisponible() throws EntityNotFoundException, NotAllowedException
 	{
 		// arrange
 		Ouvrage  ouvrage = new Ouvrage();
@@ -259,7 +312,10 @@ class OuvrageServiceImplTest
 		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
 		
 		Utilisateur utilisateur = new Utilisateur();
+		utilisateur.setEmail("dummy@domain.tld");
+		utilisateur.setRole(Role.ROLE_ADMINISTRATEUR);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(utilisateur));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(utilisateur));
 		
 		OuvrageConsultDto ouvrageDto = new OuvrageConsultDto();
 		Mockito.when(ouvrageConsultConverterMock.convertEntityToDto(Mockito.any(Ouvrage.class))).thenReturn(ouvrageDto);
@@ -269,7 +325,7 @@ class OuvrageServiceImplTest
 		Mockito.when(pretRepositoryMock.findAllReservationsByOuvrageId(Mockito.anyLong())).thenReturn(new ArrayList<Pret>());
 		
 		// act
-		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L);
+		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L, utilisateur.getEmail());
 
 		// assert
 		assertThat(actual.isReservable()).isFalse();
@@ -278,7 +334,7 @@ class OuvrageServiceImplTest
 	}
 
 	@Test
-	void consulterOuvrage_ShouldNotBeReservable_WhenReachMaxReservation() throws EntityNotFoundException
+	void consulterOuvrage_ShouldNotBeReservable_WhenReachMaxReservation() throws EntityNotFoundException, NotAllowedException
 	{
 		// arrange
 		Ouvrage  ouvrage = new Ouvrage();
@@ -286,7 +342,10 @@ class OuvrageServiceImplTest
 		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
 		
 		Utilisateur utilisateur = new Utilisateur();
+		utilisateur.setEmail("dummy@domain.tld");
+		utilisateur.setRole(Role.ROLE_ADMINISTRATEUR);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(utilisateur));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(utilisateur));
 		
 		OuvrageConsultDto ouvrageDto = new OuvrageConsultDto();
 		Mockito.when(ouvrageConsultConverterMock.convertEntityToDto(Mockito.any(Ouvrage.class))).thenReturn(ouvrageDto);
@@ -299,7 +358,7 @@ class OuvrageServiceImplTest
 		Mockito.when(pretRepositoryMock.findAllReservationsByOuvrageId(Mockito.anyLong())).thenReturn(prets);
 		
 		// act
-		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L);
+		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L, utilisateur.getEmail());
 
 		// assert
 		assertThat(actual.isReservable()).isFalse();
@@ -308,7 +367,7 @@ class OuvrageServiceImplTest
 	}
 	
 	@Test
-	void consulterOuvrage_ShouldNotBeReservable_WhenPretAlreadyExists() throws EntityNotFoundException
+	void consulterOuvrage_ShouldNotBeReservable_WhenPretAlreadyExists() throws EntityNotFoundException, NotAllowedException
 	{
 		// arrange
 		Ouvrage  ouvrage = new Ouvrage();
@@ -316,7 +375,10 @@ class OuvrageServiceImplTest
 		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
 		
 		Utilisateur utilisateur = new Utilisateur();
+		utilisateur.setEmail("dummy@domain.tld");
+		utilisateur.setRole(Role.ROLE_ADMINISTRATEUR);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(utilisateur));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(utilisateur));
 		
 		OuvrageConsultDto ouvrageDto = new OuvrageConsultDto();
 		Mockito.when(ouvrageConsultConverterMock.convertEntityToDto(Mockito.any(Ouvrage.class))).thenReturn(ouvrageDto);
@@ -330,7 +392,7 @@ class OuvrageServiceImplTest
 			thenReturn(Optional.of(pret));
 		
 		// act
-		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L);
+		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L, utilisateur.getEmail());
 
 		// assert
 		assertThat(actual.isReservable()).isFalse();
@@ -338,7 +400,7 @@ class OuvrageServiceImplTest
 	}
 	
 	@Test
-	void consulterOuvrage_ShouldBeReservable() throws EntityNotFoundException
+	void consulterOuvrage_ShouldBeReservable() throws EntityNotFoundException, NotAllowedException
 	{
 		// arrange
 		Ouvrage  ouvrage = new Ouvrage();
@@ -346,7 +408,10 @@ class OuvrageServiceImplTest
 		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
 		
 		Utilisateur utilisateur = new Utilisateur();
+		utilisateur.setEmail("dummy@domain.tld");
+		utilisateur.setRole(Role.ROLE_ADMINISTRATEUR);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(utilisateur));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(utilisateur));
 		
 		OuvrageConsultDto ouvrageDto = new OuvrageConsultDto();
 		Mockito.when(ouvrageConsultConverterMock.convertEntityToDto(Mockito.any(Ouvrage.class))).thenReturn(ouvrageDto);
@@ -359,7 +424,7 @@ class OuvrageServiceImplTest
 			thenReturn(Optional.empty());
 		
 		// act
-		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L);
+		OuvrageConsultDto actual = ouvrageServiceUnderTest.consulterOuvrage(1L,  2L, utilisateur.getEmail());
 
 		// assert
 		assertThat(actual.isReservable()).isTrue();
