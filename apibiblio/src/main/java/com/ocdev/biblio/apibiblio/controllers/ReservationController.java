@@ -1,6 +1,7 @@
 package com.ocdev.biblio.apibiblio.controllers;
 
 
+import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,11 +52,13 @@ public class ReservationController
 			@ApiResponse(code = 469, message = "Ouvrage avec exemplaire disponible")
 			})
 	@PutMapping(value = "/reservations/abonne/{abonneId}/ouvrage/{ouvrageId}", produces = "application/json" )
-	public ResponseEntity<Pret> reservation(@ApiParam(value = "ID de l'abonné", required = true, example = "1") @PathVariable @Min(1) final Long abonneId, 
-			@ApiParam(value = "ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final Long ouvrageId)
+	public ResponseEntity<Pret> reserver(@ApiParam(value = "ID de l'abonné", required = true, example = "1") @PathVariable @Min(1) final Long abonneId, 
+			@ApiParam(value = "ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final Long ouvrageId,
+			Principal requester)
 					throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException
 	{
-		Pret result = pretService.reserver(abonneId, ouvrageId);
+		String requesterName = requester.getName();
+		Pret result = pretService.reserver(abonneId, ouvrageId, requesterName);
 		return new ResponseEntity<Pret>(result, HttpStatus.CREATED);
 	}
 	
@@ -67,11 +70,13 @@ public class ReservationController
 			@ApiResponse(code = 469, message = "Seul la personne qui a réservé ou un employé peuvent annuler une réservation")
 			})
 	@PutMapping(value ="/reservations/annuler/{reservationId}/utilisateur/{utilisateurId}", produces = "application/json")
-	public ResponseEntity<?> annulationReservation(@ApiParam(value = "ID de la réservation", required = true, example = "1")
-		@PathVariable @Min(1) final Long reservationId, @ApiParam(value = "ID du demandeur", required = true, example = "1")
-		@PathVariable @Min(1) final Long utilisateurId) throws EntityNotFoundException, NotAllowedException
+	public ResponseEntity<?> annulerReservation(
+			@ApiParam(value = "ID de la réservation", required = true, example = "1") @PathVariable @Min(1) final Long reservationId, 
+			@ApiParam(value = "ID du demandeur", required = true, example = "1") @PathVariable @Min(1) final Long utilisateurId,
+			Principal requester) throws EntityNotFoundException, NotAllowedException
 	{
-		pretService.annulerReservation(reservationId, utilisateurId);
+		String requesterName = requester.getName();
+		pretService.annulerReservation(reservationId, utilisateurId, requesterName);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 	
@@ -79,17 +84,18 @@ public class ReservationController
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "La liste des réservations est retourné dans le corps de la réponse"),
 			@ApiResponse(code = 403, message = "Authentification requise"),
-			@ApiResponse(code = 404, message = "L'abonné n'existe pas")
+			@ApiResponse(code = 404, message = "L'abonné n'existe pas"),
+			@ApiResponse(code = 469, message = "Seul l'abonné ou un employé peuvent lister ses réservations")
 			})
 	@GetMapping(value = "/reservations/{abonneId}", produces = "application/json")
-	public ResponseEntity<Page<ReservationDto>> ListerReservations(@ApiParam(value = "ID de l'abonné", required = true, example = "1")
-			@PathVariable @Min(1) final Long abonneId,
+	public ResponseEntity<Page<ReservationDto>> ListerReservations(
+			@ApiParam(value = "ID de l'abonné", required = true, example = "1") @PathVariable @Min(1) final Long abonneId,
 			@RequestParam(required = false, defaultValue = "0") int page,
-			@RequestParam(required = false, defaultValue = "99") int taille) throws EntityNotFoundException
+			@RequestParam(required = false, defaultValue = "99") int taille,
+			Principal requester) throws EntityNotFoundException, NotAllowedException
 	{
-		//Pageable paging = PageRequest.of(page,  taille);
-		
-		List<ReservationDto> list = (List<ReservationDto>) pretService.listerReservationsAbonne(abonneId);
+		String requesterName = requester.getName();
+		List<ReservationDto> list = (List<ReservationDto>) pretService.listerReservationsAbonne(abonneId, requesterName);
         
 		return new ResponseEntity<Page<ReservationDto>>(new PageImpl<ReservationDto>(list), HttpStatus.OK);
 	}
@@ -102,11 +108,13 @@ public class ReservationController
 			@ApiResponse(code = 469, message = "Seul la personne qui a réservé ou un employé peuvent retirer une réservation")
 			})
 	@PutMapping(value ="/reservations/retirer/{reservationId}/utilisateur/{utilisateurId}", produces = "application/json")
-	public ResponseEntity<?> retirerReservation(@ApiParam(value = "ID de la réservation", required = true, example = "1")
-		@PathVariable @Min(1) final Long reservationId, @ApiParam(value = "ID du demandeur", required = true, example = "1")
-		@PathVariable @Min(1) final Long utilisateurId) throws EntityNotFoundException, NotAllowedException
+	public ResponseEntity<?> retirerReservation(
+			@ApiParam(value = "ID de la réservation", required = true, example = "1") @PathVariable @Min(1) final Long reservationId,
+			@ApiParam(value = "ID du demandeur", required = true, example = "1") @PathVariable @Min(1) final Long utilisateurId,
+			Principal requester) throws EntityNotFoundException, NotAllowedException
 	{
-		pretService.retirerReservation(reservationId, utilisateurId);
+		String requesterName = requester.getName();
+		pretService.retirerReservation(reservationId, utilisateurId, requesterName);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 	

@@ -205,7 +205,8 @@ public class PretServiceImpl implements PretService
 	
 	@Override
 	@Transactional
-	public Pret reserver(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException
+	public Pret reserver(Long abonneId, Long ouvrageId, String requesterName)
+			throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException
 	{
 		// verfifier si l'abonné existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
@@ -215,6 +216,12 @@ public class PretServiceImpl implements PretService
 		Optional<Ouvrage> ouvrage = ouvrageRepository.findById(ouvrageId);
 		if (!ouvrage.isPresent()) throw new EntityNotFoundException("L'ouvrage n'existe pas");
 		
+		// verifier si le demandeur est l'emprunteur ou un employé
+		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
+				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
+		if (requester.getRole() == Role.ROLE_ABONNE && !abonne.get().getEmail().equals(requesterName))
+			throw new NotAllowedException("Vous ne pouvez pas réserver cet ouvrage. Vous n'etes pas l'abonné");
+				
 		// vérifier que l'ouvrage est indisponible RG8
 		if (ouvrage.get().getNbreExemplaire() > 0) throw new NotAllowedException("Cet ouvrage est disponible");
 		
@@ -249,7 +256,7 @@ public class PretServiceImpl implements PretService
 	
 	@Override
 	@Transactional
-	public void annulerReservation(Long reservationId, Long utilisateurId) throws EntityNotFoundException, NotAllowedException
+	public void annulerReservation(Long reservationId, Long utilisateurId, String requesterName) throws EntityNotFoundException, NotAllowedException
 	{
 		Optional<Pret> reservation = pretRepository.findById(reservationId);
 		if (!reservation.isPresent()) throw new EntityNotFoundException("La réservation n'existe pas");
@@ -262,8 +269,10 @@ public class PretServiceImpl implements PretService
 		if (!demandeur.isPresent()) throw new EntityNotFoundException("Le demandeur n'existe pas");
 		
 		// verifier si le demandeur est l'emprunteur ou un employé
-		Utilisateur emprunteur = reservation.get().getAbonne();
-		if (demandeur.get().getRole() == Role.ROLE_ABONNE && demandeur.get().getId() != emprunteur.getId())
+		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
+				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
+		if (requester.getRole() == Role.ROLE_ABONNE && 
+				(demandeur.get().getId() != reservation.get().getAbonne().getId() || !demandeur.get().getEmail().equals(requesterName)))
 			throw new NotAllowedException("Vous ne pouvez pas annuler cette réservation. Vous n'etes pas le demandeur");
 			
 		// si reservation disponible, corriger le stock
@@ -286,12 +295,18 @@ public class PretServiceImpl implements PretService
 	}
 	
 	@Override
-	public Collection<ReservationDto> listerReservationsAbonne(Long abonneId) throws EntityNotFoundException
+	public Collection<ReservationDto> listerReservationsAbonne(Long abonneId, String requesterName) throws EntityNotFoundException, NotAllowedException
 	{
 		// verifier si l'abonné existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
 		if (!abonne.isPresent()) throw new EntityNotFoundException("L'abonné n'existe pas");
 		
+		// verifier si le demandeur est l'emprunteur ou un employé
+		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
+				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
+		if (requester.getRole() == Role.ROLE_ABONNE && !abonne.get().getEmail().equals(requesterName))
+			throw new NotAllowedException("Vous ne pouvez pas lister les réservations de cet abonné");
+				
 		Collection<ReservationDto> results = new ArrayList<ReservationDto>();
 		
 		Collection<Pret> reservations = pretRepository.findAllReservationsByAbonneId(abonneId);
@@ -321,22 +336,24 @@ public class PretServiceImpl implements PretService
 	
 	@Override
 	@Transactional
-	public Pret retirerReservation(Long reservationId, Long utilisateurId) throws EntityNotFoundException, NotAllowedException
+	public Pret retirerReservation(Long reservationId, Long utilisateurId, String requesterName) throws EntityNotFoundException, NotAllowedException
 	{
 		Optional<Pret> reservation = pretRepository.findById(reservationId);
 		if (!reservation.isPresent()) throw new EntityNotFoundException("La réservation n'existe pas");
 		
 		// verifier si la réservation est disponible
-		if (reservation.get().getStatut() != Statut.DISPONIBLE) throw new EntityNotFoundException("La réservation n'existe pas");
+		if (reservation.get().getStatut() != Statut.DISPONIBLE) throw new EntityNotFoundException("L'ouvrage n'est pas disponible");
 		
 		// verifier si le demandeur existe
 		Optional<Utilisateur> demandeur = utilisateurRepository.findById(utilisateurId);
 		if (!demandeur.isPresent()) throw new EntityNotFoundException("Le demandeur n'existe pas");
 		
 		// verifier si le demandeur est l'emprunteur ou un employé
-		Utilisateur emprunteur = reservation.get().getAbonne();
-		if (demandeur.get().getRole() == Role.ROLE_ABONNE && demandeur.get().getId() != emprunteur.getId())
-			throw new NotAllowedException("Vous ne pouvez pas retirer cette réservation. Vous n'etes pas l'emprunteur");
+		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
+				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
+		if (requester.getRole() == Role.ROLE_ABONNE && 
+				(demandeur.get().getId() != reservation.get().getAbonne().getId() ||!demandeur.get().getEmail().equals(requesterName)))
+			throw new NotAllowedException("Vous ne pouvez pas retirer cette réservation. Vous n'etes pas l'abonné");
 				
 		// changer statut
 		reservation.get().setStatut(Statut.EN_COURS);
@@ -391,7 +408,7 @@ public class PretServiceImpl implements PretService
 			{
 				try
 				{
-					annulerReservation(reservation.get().getId(), reservation.get().getAbonne().getId());	
+					annulerReservation(reservation.get().getId(), reservation.get().getAbonne().getId(), reservation.get().getAbonne().getEmail());	
 				} 
 				catch (EntityNotFoundException e)
 				{
