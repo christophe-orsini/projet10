@@ -17,10 +17,12 @@ import com.ocdev.biblio.apibiblio.dto.OuvrageConsultDto;
 import com.ocdev.biblio.apibiblio.dto.OuvrageCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.entities.Pret;
+import com.ocdev.biblio.apibiblio.entities.Role;
 import com.ocdev.biblio.apibiblio.entities.Theme;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
+import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 import com.ocdev.biblio.apibiblio.utils.AppSettings;
 
 @Service
@@ -67,7 +69,7 @@ public class OuvrageServiceImpl implements OuvrageService
 	}
 
 	@Override
-	public OuvrageConsultDto consulterOuvrage(long ouvrageId, long utilisateurId) throws EntityNotFoundException
+	public OuvrageConsultDto consulterOuvrage(long ouvrageId, long utilisateurId, String requesterName) throws EntityNotFoundException, NotAllowedException
 	{
 		Optional<Ouvrage> ouvrage = ouvrageRepository.findById(ouvrageId);
 		if (!ouvrage.isPresent()) throw new EntityNotFoundException("L'ouvrage n'existe pas");
@@ -75,6 +77,12 @@ public class OuvrageServiceImpl implements OuvrageService
 		Optional<Utilisateur> utilisateur = utilisateurRepository.findById(utilisateurId);
 		if (!utilisateur.isPresent()) throw new EntityNotFoundException("L'utilisateur n'existe pas");
 		
+		// verifier si le demandeur est l'emprunteur ou un employé
+		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
+				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
+		if (requester.getRole() == Role.ROLE_ABONNE && !utilisateur.get().getEmail().equals(requesterName))
+			throw new NotAllowedException("Vous ne pouvez pas consulter cet ouvrage. Vous n'etes pas l'abonné");
+				
 		OuvrageConsultDto result = ouvrageConsultConverter.convertEntityToDto(ouvrage.get());
 		result.setReservable(false);
 		

@@ -1,5 +1,7 @@
 package com.ocdev.biblio.apibiblio.controllers;
 
+import java.security.Principal;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import com.ocdev.biblio.apibiblio.dto.OuvrageCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
+import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 import com.ocdev.biblio.apibiblio.services.OuvrageService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -53,14 +56,17 @@ public class OuvrageController
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "L'ouvrage trouvé est retourné dans le corps de la réponse"),
 			@ApiResponse(code = 403, message = "Authentification requise"),
-			@ApiResponse(code = 404, message = "L'ouvrage ou l'utilisateur avec cet ID n'existe pas")
+			@ApiResponse(code = 404, message = "L'ouvrage ou l'utilisateur avec cet ID n'existe pas"),
+			@ApiResponse(code = 469, message = "Le demandeur autentifié n'est pas l'abonné")
 			})
 	@GetMapping(value = "/ouvrages/{ouvrageId}/utilisateur/{utilisateurId}", produces = "application/json")
-	public ResponseEntity<OuvrageConsultDto> getOuvrageById(@ApiParam(value="ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final long ouvrageId,
-			@ApiParam(value="ID de l'utilisateur", required = true, example = "1")
-			@PathVariable @Min(1) final long utilisateurId) throws EntityNotFoundException
+	public ResponseEntity<OuvrageConsultDto> getOuvrageById(
+			@ApiParam(value="ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final long ouvrageId,
+			@ApiParam(value="ID de l'utilisateur", required = true, example = "1") @PathVariable @Min(1) final long utilisateurId,
+			Principal requester) throws EntityNotFoundException, NotAllowedException
 	{
-		OuvrageConsultDto ouvrage = ouvrageService.consulterOuvrage(ouvrageId, utilisateurId);
+		String requesterName = requester.getName();
+		OuvrageConsultDto ouvrage = ouvrageService.consulterOuvrage(ouvrageId, utilisateurId, requesterName);
 		return new ResponseEntity<OuvrageConsultDto>(ouvrage, HttpStatus.OK);
 	}
 	

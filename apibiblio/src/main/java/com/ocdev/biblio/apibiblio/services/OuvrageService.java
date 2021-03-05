@@ -8,6 +8,7 @@ import com.ocdev.biblio.apibiblio.dto.OuvrageCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
+import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
 
 /**
  * Interface de déclaration des services pour les ouvrages.
@@ -37,8 +38,10 @@ public interface OuvrageService
 	 * 
 	 * @param ouvrageId L'id de l'ouvrage
 	 * @param utilisateurId L'id de l'utilisateur
+	 * @param reqesterName L'email (login) du demandeur
 	 * @return L'ouvrage trouvé
 	 * @throws EntityNotFoundException levée si l'id n'existe pas
+	 * @throws NotAllowedException levée si la demande ne vient pas de l'abonné ou d'un employé
 	 */
-	public OuvrageConsultDto consulterOuvrage(long ouvrageId, long utilisateurId) throws EntityNotFoundException;
+	public OuvrageConsultDto consulterOuvrage(long ouvrageId, long utilisateurId, String requesterName) throws EntityNotFoundException, NotAllowedException;
 }
