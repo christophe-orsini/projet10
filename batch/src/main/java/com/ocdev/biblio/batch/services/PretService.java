@@ -21,4 +21,31 @@ public interface PretService
 	 * @return La liste des abonnés avec leurs prets respectifs
 	 */
 	public Collection<Utilisateur> pretsParAbonne(Collection<Pret> prets);
+	/**
+	 * Retourne une liste de réservations disponibles
+	 * @return La liste des réservations
+	 */
+	public Collection<Pret> listeReservationsDisponibles();
+	/**
+	 * Obtenir la liste des réservations disponibles pour lesquelles un email n'a pas été envoyé
+	 * @param listeReservationsDisponibles
+	 * @return La liste des emails à envoyer
+	 */
+	Collection<Pret> listeEmailsAEnvoyer(Collection<Pret> listeReservationsDisponibles);
+	/**
+	 * Enregistrer l'envoi d'un email pour une liste de réservations
+	 * @param emailsAEnvoyer
+	 */
+	public void SetEmailEnvoyé(Collection<Pret> emailsAEnvoyer);
+	/**
+	 * Obtenir la liste des réservations échues
+	 * @param reservationsDisponibles
+	 * @return La liste des réservations à annuler
+	 */
+	public Collection<Pret> listeReservationsEchues(Collection<Pret> reservationsDisponibles);
+	/**
+	 * Annuler une liste de réservations échues
+	 * @param reservationsEchues
+	 */
+	public void annulerReservations(Collection<Pret> reservationsEchues);
 }

@@ -48,4 +48,27 @@ public class ScheduledTask
 					properties.emailContact());
 		}
 	}
+	
+	@Scheduled(cron = "${app.cron.reservation.expression}")
+	public void cronReservationTask() throws AddressException, MessagingException, IOException
+	{
+		Collection<Pret> reservationsDisponibles = pretService.listeReservationsDisponibles();
+		
+		Collection<Pret> emailsAEnvoyer = pretService.listeEmailsAEnvoyer(reservationsDisponibles);
+		Collection<Utilisateur> abonnes = pretService.pretsParAbonne(emailsAEnvoyer);
+		for (Utilisateur abonne : abonnes)
+		{
+			String emailContent = contentBuilder.buildReservationEmail(abonne);
+			emailService.envoiEmailHtml(
+					abonne.getEmail(),
+					emailContent,
+					properties.emailReservationSubject(),
+					properties.emailContact());
+		}
+		
+		pretService.SetEmailEnvoyé(emailsAEnvoyer);
+		
+		Collection<Pret> reservationsEchues = pretService.listeReservationsEchues(reservationsDisponibles);
+		pretService.annulerReservations(reservationsEchues);
+	}
 }

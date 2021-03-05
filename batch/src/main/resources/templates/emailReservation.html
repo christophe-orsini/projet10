@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Email d'information</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+ <body>
+ 	<h1 th:text="${societe}"></h1> 
+ 	<br />
+    <p>Bonjour M <span th:text="${abonne.nom} ?: ''"></span></p>
+
+   <p th:if="${#lists.size(abonne.prets) > 1}">
+    	Les ouvrages <span th:text="${#lists.size(abonne.prets)}"></span> que vous aviez réservés sont maintenant disponibles :
+   	</p>
+   	<p th:unless="${#lists.size(abonne.prets) > 1}">
+    	L'ouvrgae que vous aviez réservé est maintenant disponible :
+   	</p>
+    <table border="1">
+    	<tr>
+    		<th>Ouvrage</th>
+    		<th>Réservé le</th>
+    		<th>Date limite de retrait*</th>
+    		<th></th>
+    	</tr>
+    	<tr th:each="pret : ${abonne.prets}">
+            <td th:text="${pret.ouvrage.titre}"></td>
+            <td th:text="${#dates.format(pret.dateHeureReservation, 'dd MMMM yyyy')}"></td>
+            <td th:text="${#dates.format(pret.dateHeureExpiration, 'dd MMMM yyyy')}"> avant la fermeture</td>
+            <td><a th:href="@{${notreSite}}">Retirer l'ouvrage</a></td>
+        </tr>
+    </table> 
+    	
+    <p>Pour toutes questions ou en cas de difficulté, vous pouvez nous contacter par email à cette adresse
+    	<a th:href="@{'mailto:' + ${email}}"><span th:text="${email}"></span></a>	
+    </p>
+    <p>*La date limite de retrait s'entend le soir avant la fermeture de la bibliothèque</p>
+    <p>Cordialement<br /><br />
+      L'équipe des bibliothèques de Bouquinville
+    </p>
+  </body>
+</html>

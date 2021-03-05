@@ -34,4 +34,22 @@ public class EmailContentBuilder
         
         return templateEngine.process("email", context);
 	}
+	
+	/**
+	 * Création du contenu d'un email d'information de réservation disponible
+	 * 
+	 * Le contenu est créé par le templateEngine
+	 * @param abonne L'abonné avec l'ouvrage réservé
+	 * @return Le texte à mettre dans le contenu de l'email
+	 */
+	public String buildReservationEmail(Utilisateur abonne)
+	{
+		Context context = new Context();
+        context.setVariable("societe", properties.societe());
+        context.setVariable("abonne", abonne);
+        context.setVariable("email", properties.emailContact());
+        context.setVariable("notreSite", properties.urlWebApp());
+        
+        return templateEngine.process("emailReservation", context);
+	}
 }

@@ -1,21 +1,14 @@
 package com.ocdev.biblio.apibiblio.assemblers;
 
 import org.hibernate.cfg.NotYetImplementedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.ocdev.biblio.apibiblio.dto.OuvrageCreateDto;
-import com.ocdev.biblio.apibiblio.dto.ThemeCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.entities.Theme;
-import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
-import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
-import com.ocdev.biblio.apibiblio.services.ThemeService;
 
 @Component
 public class OuvrageCreateDtoConverter implements IDtoConverter<Ouvrage, OuvrageCreateDto>
 {
-	@Autowired ThemeService themeService;
-	
 	@Override
 	public Ouvrage convertDtoToEntity(OuvrageCreateDto ouvrageCreateDto)
 	{
@@ -25,40 +18,17 @@ public class OuvrageCreateDtoConverter implements IDtoConverter<Ouvrage, Ouvrage
 		ouvrage.setAuteur(ouvrageCreateDto.getAuteur());
 		ouvrage.setResume(ouvrageCreateDto.getResume());
 		ouvrage.setAnneeEdition(ouvrageCreateDto.getAnneeEdition());
-		Theme theme = null;
-		try
-		{
-			theme = themeService.obtenir(ouvrageCreateDto.getTheme());
-		}
-		catch (EntityNotFoundException e)
-		{
-			try
-			{
-				theme = themeService.obtenir("Inconnu");
-			}
-			catch (EntityNotFoundException e2)
-			{
-				try
-				{
-					ThemeCreateDto themeCreateDto = new ThemeCreateDto();
-					themeCreateDto.setNom("Inconnu");
-					theme = themeService.creer(themeCreateDto);
-				}
-				catch (AlreadyExistsException e3)
-				{
-					// Impossible
-					// TODO: handle exception
-					// log
-				}
-			}
-		}
+		
+		Theme theme = new Theme();
+		theme.setId(ouvrageCreateDto.getTheme());
+	
 		ouvrage.setTheme(theme);
-		ouvrage.setNbreExemplaire(ouvrageCreateDto.getNbreExemplaire());
+		ouvrage.setNbreExemplaireTotal(ouvrageCreateDto.getNbreExemplaireTotal());
 		
 		return ouvrage;
 	}
 
-		@Override
+	@Override
 	public OuvrageCreateDto convertEntityToDto(Ouvrage entity)
 	{
 		// TODO Auto-generated method stub

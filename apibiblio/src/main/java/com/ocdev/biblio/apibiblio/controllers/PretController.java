@@ -1,5 +1,6 @@
 package com.ocdev.biblio.apibiblio.controllers;
 
+import java.security.Principal;
 import java.util.Collection;
 import java.util.Date;
 
@@ -43,14 +44,16 @@ public class PretController
 			@ApiResponse(code = 403, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "L'abonné et/ou l'ouvrage n'existe pas"),
 			@ApiResponse(code = 460, message = "Un prêt en cours existe déjà pour cet ouvrage et cet abonné"),
-			@ApiResponse(code = 462, message = "Pas assez d'exemplaires pour le prêt de cet ouvrage")
+			@ApiResponse(code = 462, message = "Pas assez d'exemplaires pour le prêt de cet ouvrage"),
+			@ApiResponse(code = 469, message = "Le demandeur autentifié n'est pas l'abonné")
 			})
 	@PutMapping(value = "/prets/abonne/{abonneId}/ouvrage/{ouvrageId}", produces = "application/json" )
 	public ResponseEntity<Pret> pret(@ApiParam(value = "ID de l'abonné", required = true, example = "1") @PathVariable @Min(1) final Long abonneId, 
-			@ApiParam(value = "ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final Long ouvrageId)
-					throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException
+			@ApiParam(value = "ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final Long ouvrageId,
+			Principal requester) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, NotAllowedException
 	{
-		Pret result = pretService.creer(abonneId, ouvrageId);
+		String requesterName = requester.getName();
+		Pret result = pretService.creer(abonneId, ouvrageId, requesterName);
 		return new ResponseEntity<Pret>(result, HttpStatus.CREATED);
 	}
 	
@@ -59,14 +62,15 @@ public class PretController
 			@ApiResponse(code = 200, message = "Le retour du prêt est enregistré"),
 			@ApiResponse(code = 403, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "Le prêt n'existe pas"),
-			@ApiResponse(code = 469, message = "Seul l'emprunteur ou un employé peuvent retourner un prêt")
+			@ApiResponse(code = 469, message = "Seul l'emprunteur authentifié peut retourner son prêt")
 			})
 	@PutMapping(value ="/prets/retour/{pretId}/utilisateur/{utilisateurId}", produces = "application/json")
-	public ResponseEntity<?> retourPret(@ApiParam(value = "ID du prêt", required = true, example = "1")
-		@PathVariable @Min(1) final Long pretId, @ApiParam(value = "ID du demandeur", required = true, example = "1")
-		@PathVariable @Min(1) final Long utilisateurId) throws EntityNotFoundException, NotAllowedException
+	public ResponseEntity<?> retourPret(@ApiParam(value = "ID du prêt", required = true, example = "1") @PathVariable @Min(1) final Long pretId,
+		@ApiParam(value = "ID du demandeur", required = true, example = "1") @PathVariable @Min(1) final Long utilisateurId,
+		Principal requester) throws EntityNotFoundException, NotAllowedException
 	{
-		pretService.retournerOuvrage(pretId, utilisateurId);
+		String requesterName = requester.getName();
+		pretService.retournerOuvrage(pretId, utilisateurId, requesterName);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 	
@@ -74,17 +78,20 @@ public class PretController
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "La liste des prêts est retourné dans le corps de la réponse"),
 			@ApiResponse(code = 403, message = "Authentification requise"),
-			@ApiResponse(code = 404, message = "L'abonné n'existe pas")
+			@ApiResponse(code = 404, message = "L'abonné n'existe pas"),
+			@ApiResponse(code = 469, message = "Seul l'emprunteur authentifié peut lister ses prêts")
 			})
 	@GetMapping(value = "/prets/{abonneId}", produces = "application/json")
 	public ResponseEntity<Page<Pret>> ListeMesPrets(@ApiParam(value = "ID de l'abonné", required = true, example = "1")
 			@PathVariable @Min(1) final Long abonneId,
 			@RequestParam(required = false, defaultValue = "0") int page,
-			@RequestParam(required = false, defaultValue = "99") int taille) throws EntityNotFoundException
+			@RequestParam(required = false, defaultValue = "99") int taille,
+			Principal requester) throws EntityNotFoundException, NotAllowedException
 	{
 		Pageable paging = PageRequest.of(page,  taille);
 		
-		Page<Pret> results = pretService.listerSesPrets(abonneId, paging);
+		String requesterName = requester.getName();
+		Page<Pret> results = pretService.listerSesPrets(abonneId, paging, requesterName);
 		return new ResponseEntity<Page<Pret>>(results, HttpStatus.OK);
 	}
 	
@@ -94,14 +101,15 @@ public class PretController
 			@ApiResponse(code = 403, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "Le prêt n'existe pas"),
 			@ApiResponse(code = 461, message = "Le prêt ne peut plus être prolongé"),
-			@ApiResponse(code = 469, message = "Seul l'emprunteur ou un employé peuvent prolonger un prêt")
+			@ApiResponse(code = 469, message = "Seul l'emprunteur authentifié peut prolonger son prêt")
 			})
 	@PutMapping(value ="/prets/prolonge/{pretId}/utilisateur/{utilisateurId}", produces = "application/json")
-	public ResponseEntity<Pret> prolongePret(@ApiParam(value = "ID du prêt", required = true, example = "1")
-		@PathVariable @Min(1) final Long pretId, @ApiParam(value = "ID du demandeur", required = true, example = "1")
-		@PathVariable @Min(1) final Long utilisateurId)	throws EntityNotFoundException, DelayLoanException, NotAllowedException
+	public ResponseEntity<Pret> prolongePret(@ApiParam(value = "ID du prêt", required = true, example = "1") @PathVariable @Min(1) final Long pretId,
+			@ApiParam(value = "ID du demandeur", required = true, example = "1") @PathVariable @Min(1) final Long utilisateurId,
+			Principal requester)	throws EntityNotFoundException, DelayLoanException, NotAllowedException
 	{
-		Pret result = pretService.prolonger(pretId, utilisateurId);
+		String requesterName = requester.getName();
+		Pret result = pretService.prolonger(pretId, utilisateurId, requesterName);
 		return new ResponseEntity<Pret>(result, HttpStatus.OK);
 	}
 	
@@ -110,8 +118,7 @@ public class PretController
 			@ApiResponse(code = 200, message = "La liste est retournée dans le corps de la réponse")
 			})
 	@GetMapping(value ="/prets/retard", produces = "application/json")
-	public ResponseEntity<Collection<Pret>> pretsEnRetard(
-			@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") final Date dateMaxi)
+	public ResponseEntity<Collection<Pret>> pretsEnRetard(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") final Date dateMaxi)
 	{
 		Collection<Pret> result = pretService.pretsEnRetard(dateMaxi);
 		return new ResponseEntity<Collection<Pret>>(result, HttpStatus.OK);

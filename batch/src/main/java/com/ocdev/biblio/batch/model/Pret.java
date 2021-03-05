@@ -11,6 +11,9 @@ import java.util.Date;
 public class Pret implements Serializable
 {
 	private Long id;
+	private Date dateHeureReservation;
+	private Date dateHeureExpiration;
+	private boolean emailEnvoye;
 	private Date dateDebut;
 	private Date dateFinPrevu;
 	private Date dateRetour;
@@ -39,6 +42,30 @@ public class Pret implements Serializable
 	public void setId(Long id)
 	{
 		this.id = id;
+	}
+
+	public Date getDateHeureReservation() {
+		return dateHeureReservation;
+	}
+
+	public void setDateHeureReservation(Date dateHeureReservation) {
+		this.dateHeureReservation = dateHeureReservation;
+	}
+
+	public Date getDateHeureExpiration() {
+		return dateHeureExpiration;
+	}
+
+	public void setDateHeureExpiration(Date dateHeureExpiration) {
+		this.dateHeureExpiration = dateHeureExpiration;
+	}
+
+	public boolean isEmailEnvoye() {
+		return emailEnvoye;
+	}
+
+	public void setEmailEnvoye(boolean emailEnvoye) {
+		this.emailEnvoye = emailEnvoye;
 	}
 
 	public Date getDateDebut()
