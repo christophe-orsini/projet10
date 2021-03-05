@@ -1,6 +1,8 @@
 package com.ocdev.biblio.apibiblio.services;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
@@ -13,6 +15,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import com.ocdev.biblio.apibiblio.assemblers.IDtoConverter;
 import com.ocdev.biblio.apibiblio.dao.OuvrageRepository;
 import com.ocdev.biblio.apibiblio.dao.PretRepository;
@@ -37,7 +42,7 @@ class PretServiceImplTest
 	@Mock private OuvrageRepository ouvrageRepositoryMock;
 	@Mock private UtilisateurRepository utilisateurRepositoryMock;
 	@Mock private IDtoConverter<Pret, ReservationDto> reservationConverterMock;
-	@Mock Page<Ouvrage> pageMock;
+	@Mock Page<Pret> pageMock;
 	
 	@BeforeEach
 	void setUp() throws Exception
@@ -144,7 +149,7 @@ class PretServiceImplTest
 		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
 		{
 			pretServiceUnderTest.creer(2L, 1L, requester.getEmail());
-		}).withMessage("Vous ne pouvez pas créer ce prêt. Vous n'etes pas l'emprunteur");
+		}).withMessage("Vous ne pouvez pas créer un pret pour un autre abonné");
 	}
 	
 	@Test
@@ -547,5 +552,120 @@ class PretServiceImplTest
 		
 		// assert
 		Mockito.verify(pretRepositoryMock, Mockito.times(1)).save(Mockito.any(Pret.class));
+	}
+	
+	@Test
+	void listerSesPrets_ShouldRaiseEntityNotFoundException_WhenAbonneNotExists()
+	{
+		//arrange
+		Pageable pageable = PageRequest.of(0, 8);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+		
+		// act & assert
+		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.listerSesPrets(2L, pageable, "");
+		}).withMessage("L'abonné n'existe pas");
+	}
+	
+	@Test
+	void listerSesPrets_ShouldRaiseNotAllowedException_WhenRequesterNotExists()
+	{
+		//arrange
+		Pageable pageable = PageRequest.of(0, 8);
+		Utilisateur abonne = new Utilisateur();
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty());
+		
+		// act & assert
+		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.listerSesPrets(2L, pageable, "");
+		}).withMessage("Vous n'etes pas correctement authentifié");
+	}
+	
+	@Test
+	void listerSesPrets_ShouldRaiseNotAllowedException_WhenRequesterIsNotAbonne()
+	{
+		//arrange
+		Pageable pageable = PageRequest.of(0, 8);
+		Utilisateur abonne = new Utilisateur();
+		abonne.setEmail("abonne@biblio.fr");
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Utilisateur requester = new Utilisateur();
+		requester.setEmail("dummy@domain.tld");
+		requester.setRole(Role.ROLE_ABONNE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(requester));
+		
+		// act & assert
+		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.listerSesPrets(2L, pageable, requester.getEmail());
+		}).withMessage("Vous ne pouvez pas lister les prêts d'un autre abonné");
+	}
+	
+	@Test
+	void listerSesPrets_ShouldSuccess() throws EntityNotFoundException, NotAllowedException
+	{
+		//arrange
+		Pageable pageable = PageRequest.of(0, 8);
+		Utilisateur abonne = new Utilisateur();
+		abonne.setEmail("dummy@domain.tld");
+		abonne.setRole(Role.ROLE_EMPLOYE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(abonne));
+		
+		Mockito.when(pretRepositoryMock.findAllPretsByAbonneId(2L, pageable)).thenReturn(pageMock);
+		
+		// act 
+		pretServiceUnderTest.listerSesPrets(2L, pageable, abonne.getEmail());
+		
+		// assert
+		Mockito.verify(pretRepositoryMock, Mockito.times(1)).findAllPretsByAbonneId(2L, pageable);
+	}
+	
+	@Test
+	void consulter_ShouldRaiseEntityNotFoundException_WhenPretNotExists()
+	{
+		//arrange
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+		
+		// act & assert
+		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.consulter(1L);
+		}).withMessage("Le prêt n'existe pas");
+	}
+	
+	@Test
+	void consulter_ShouldSuccess() throws EntityNotFoundException
+	{
+		//arrange
+		Pret pret = new Pret();
+		pret.setId(5L);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		// act 
+		Pret actual = pretServiceUnderTest.consulter(5L);
+		
+		// assert
+		assertThat(actual.getId()).isEqualTo(5L);
+	}
+	@Test
+	public void pretsEnRetard_ShouldSuccess()
+	{
+		// arrange
+		Mockito.<Collection<Pret>>when(pretRepositoryMock.findByDateFinPrevuLessThan(Mockito.any(Date.class))).thenReturn(new ArrayList<Pret>());
+		
+		// act
+		
+		Collection<Pret> prets = pretServiceUnderTest.pretsEnRetard(null);
+		
+		// assert
+		assertThat(prets).isNotNull();	
+		Mockito.verify(pretRepositoryMock, Mockito.times(1)).findByDateFinPrevuLessThan(Mockito.any(Date.class));
 	}
 }

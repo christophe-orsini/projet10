@@ -73,7 +73,7 @@ public class PretServiceImpl implements PretService
 		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
 				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
 		if (requester.getRole() == Role.ROLE_ABONNE && !abonne.get().getEmail().equals(requesterName))
-			throw new NotAllowedException("Vous ne pouvez pas créer ce prêt. Vous n'etes pas l'emprunteur");
+			throw new NotAllowedException("Vous ne pouvez pas créer un pret pour un autre abonné");
 				
 		// verifier s'il y a assez d'exemplaires d'ouvrage
 		if (ouvrage.get().getNbreExemplaire() < 1) throw new NotEnoughCopiesException("Pas assez d'exemplaires pour le prêt de cet ouvrage");
