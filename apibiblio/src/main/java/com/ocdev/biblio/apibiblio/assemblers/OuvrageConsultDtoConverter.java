@@ -1,7 +1,6 @@
 package com.ocdev.biblio.apibiblio.assemblers;
 
 import org.hibernate.cfg.NotYetImplementedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.ocdev.biblio.apibiblio.dto.OuvrageConsultDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;

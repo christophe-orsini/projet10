@@ -3,7 +3,7 @@
 ## Project N°7 Gestion du SI des bibliothèques de Bouquinville
 
 * Développeur : Christophe ORSINI
-* Version 1.0.7
+* Version 1.1.7
 
 ---
 ### Prérequis
@@ -36,7 +36,7 @@ rubriques `spring.datasource.username` et `spring.datasource.password`
 L'application est prète à fonctionner avec l'utilisateur :
 - `abonne@biblio.fr` mot de passe `abonne` pour le rôle d'utilisateur connecté
 
-### Mise à jour pour la version 1.0.7
+### Mise à jour pour la version 1.1.7
 Pour mettre à jour l'application, exécuter les étapes 2, 5 et 6 ci-dessus  
 > L'application doit être arrêtée avant la mise à jour
 
