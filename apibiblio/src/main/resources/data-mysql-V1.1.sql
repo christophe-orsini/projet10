@@ -27,16 +27,16 @@ INSERT INTO utilisateur (id, email, nom, password, prenom, role) VALUES
 (4, "abonne2@biblio.fr", "Abonné 2", "$2a$10$HiQbf4cxgm48/wry4X7AOeKqxNtJ3CCs5H6ycoubQAnIGhjEKeSkO", NULL, "ROLE_ABONNE");
 
 INSERT INTO pret (id, date_heure_reservation, date_debut, date_fin_prevu, date_retour, statut, abonne_id, ouvrage_id, periodes, prolongations_possible) VALUES
-(1, NULL, "2021-01-31", "2021-02-28", NULL, "EN_COURS", 1, 1, 1, 1),
-(2, NULL, "2021-01-02", "2021-02-27", NULL, "PROLONGE", 2, 2, 2, 0),
-(3, NULL, "2020-12-21", "2021-02-15", NULL, "PROLONGE", 2, 3, 2, 0),
-(4, NULL, "2021-01-22", "2021-02-19", NULL, "EN_COURS", 2, 4, 1, 1),
-(5, NULL, "2021-01-21", "2021-02-18", NULL, "EN_COURS", 2, 5, 1, 1),
-(6, NULL, "2021-01-29", "2021-02-26", NULL, "EN_COURS", 1, 2, 1, 1);
+(1, NULL, "2021-02-13", "2021-03-13", NULL, "EN_COURS", 1, 1, 1, 1),
+(2, NULL, "2021-01-07", "2021-03-04", NULL, "PROLONGE", 2, 2, 2, 0),
+(3, NULL, "2021-01-18", "2021-03-15", NULL, "PROLONGE", 2, 3, 2, 0),
+(4, NULL, "2021-02-05", "2021-03-05", NULL, "EN_COURS", 2, 4, 1, 1),
+(5, NULL, "2021-02-04", "2021-03-04", NULL, "EN_COURS", 2, 5, 1, 1),
+(6, NULL, "2021-02-08", "2021-03-08", NULL, "EN_COURS", 1, 2, 1, 1);
 
 INSERT INTO pret (id, date_heure_reservation, date_heure_expiration, statut, email_envoye,  abonne_id, ouvrage_id, periodes, prolongations_possible) VALUES
-(7, "2021-01-15 10:53:07", NULL, "RESERVE", 0, 3, 3, 0, 0),
-(8, "2021-02-17 10:53:07", NULL, "RESERVE", 0, 1, 3, 0, 0),
-(9, "2021-02-03 10:53:07", "2021-02-19 13:30:55", "DISPONIBLE", 1, 1, 5, 0, 0);
+(7, "2021-02-23 09:53:00", NULL, "RESERVE", 0, 3, 3, 0, 0),
+(8, "2021-03-02 10:21:00", NULL, "RESERVE", 0, 1, 3, 0, 0),
+(9, "2021-02-27 14:17:00", "2021-03-04 08:30:00", "DISPONIBLE", 1, 1, 5, 0, 0);
 
 
