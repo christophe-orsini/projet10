@@ -59,7 +59,7 @@ class PretServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.creer(2L, 1L);
+			pretServiceUnderTest.creer(2L, 1L, "");
 		}).withMessage("L'abonné n'existe pas");
 	}	
 	
@@ -75,7 +75,7 @@ class PretServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.creer(2L, 1L);
+			pretServiceUnderTest.creer(2L, 1L, "");
 		}).withMessage("L'ouvrage n'existe pas");
 	}
 	
@@ -96,8 +96,55 @@ class PretServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(AlreadyExistsException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.creer(2L, 1L);
+			pretServiceUnderTest.creer(2L, 1L, "");
 		}).withMessage("Un prêt en cours existe déjà pour cet abonné et cet ouvrage");
+	}
+	
+	@Test
+	void creer_ShouldRaiseNotAllowedException_WhenRequesterNotExists()
+	{
+		//arrange
+		Utilisateur abonne = new Utilisateur();
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty());
+		
+		Ouvrage ouvrage =  new Ouvrage();
+		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
+		
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByAbonneIdAndOuvrageIdAndEnPret(Mockito.anyLong(), Mockito.anyLong()))
+			.thenReturn(Optional.empty());
+		
+		// act & assert
+		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.creer(2L, 1L, "");
+		}).withMessage("Vous n'etes pas correctement authentifié");
+	}
+	
+	@Test
+	void creer_ShouldRaiseNotAllowedException_WhenRequesterIsNotAbonne()
+	{
+		//arrange
+		Utilisateur abonne = new Utilisateur();
+		abonne.setEmail("abonne@biblio.fr");
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Utilisateur requester = new Utilisateur();
+		requester.setEmail("dummy@domain.tld");
+		requester.setRole(Role.ROLE_ABONNE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(requester));
+		
+		Ouvrage ouvrage =  new Ouvrage();
+		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
+		
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByAbonneIdAndOuvrageIdAndEnPret(Mockito.anyLong(), Mockito.anyLong()))
+			.thenReturn(Optional.empty());
+		
+		// act & assert
+		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.creer(2L, 1L, requester.getEmail());
+		}).withMessage("Vous ne pouvez pas créer ce prêt. Vous n'etes pas l'emprunteur");
 	}
 	
 	@Test
@@ -105,8 +152,11 @@ class PretServiceImplTest
 	{
 		//arrange
 		Utilisateur abonne = new Utilisateur();
+		abonne.setEmail("dummy@domain.tld");
+		abonne.setRole(Role.ROLE_EMPLOYE);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
-
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(abonne));
+		
 		Ouvrage ouvrage =  new Ouvrage();
 		Mockito.<Optional<Ouvrage>>when(ouvrageRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(ouvrage));
 		
@@ -116,16 +166,19 @@ class PretServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(NotEnoughCopiesException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.creer(2L, 1L);
+			pretServiceUnderTest.creer(2L, 1L, abonne.getEmail());
 		}).withMessage("Pas assez d'exemplaires pour le prêt de cet ouvrage");
 	}
 	
 	@Test
-	void creer_ShouldReturn1Exemplaire_WhenCalledWith2Exemplaires() throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException
+	void creer_ShouldReturn1Exemplaire_WhenCalledWith2Exemplaires() throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, NotAllowedException
 	{
 		//arrange
 		Utilisateur abonne = new Utilisateur();
+		abonne.setEmail("dummy@domain.tld");
+		abonne.setRole(Role.ROLE_EMPLOYE);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(abonne));
 
 		Ouvrage ouvrage =  new Ouvrage();
 		ouvrage.setId(1L);
@@ -143,7 +196,7 @@ class PretServiceImplTest
 		Mockito.when(pretRepositoryMock.save(Mockito.any(Pret.class))).thenReturn(pret);
 		
 		// act
-		Pret actual = pretServiceUnderTest.creer(2L,  pret.getId());
+		Pret actual = pretServiceUnderTest.creer(2L,  pret.getId(), abonne.getEmail());
 		
 		// assert
 		assertThat(actual.getOuvrage().getNbreExemplaire()).isEqualTo(1);
@@ -151,12 +204,15 @@ class PretServiceImplTest
 	}
 	
 	@Test
-	void creer_ShouldReturnAbonne2_WhenSuccess() throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException
+	void creer_ShouldReturnAbonne2_WhenSuccess() throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, NotAllowedException
 	{
 		//arrange
 		Utilisateur abonne = new Utilisateur();
 		abonne.setId(2L);
+		abonne.setEmail("dummy@domain.tld");
+		abonne.setRole(Role.ROLE_EMPLOYE);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(abonne));
 
 		Ouvrage ouvrage =  new Ouvrage();
 		ouvrage.setId(1L);
@@ -174,7 +230,7 @@ class PretServiceImplTest
 		Mockito.when(pretRepositoryMock.save(Mockito.any(Pret.class))).thenReturn(pret);
 		
 		// act
-		Pret actual = pretServiceUnderTest.creer(abonne.getId(),  pret.getId());
+		Pret actual = pretServiceUnderTest.creer(abonne.getId(),  pret.getId(), abonne.getEmail());
 		
 		// assert
 		assertThat(actual.getAbonne().getId()).isEqualTo(2L);
@@ -191,7 +247,7 @@ class PretServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.retournerOuvrage(1L, 2L);
+			pretServiceUnderTest.retournerOuvrage(1L, 2L, "");
 		}).withMessage("Le prêt n'existe pas");
 	}
 	
@@ -207,48 +263,71 @@ class PretServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.retournerOuvrage(1L, 2L);
-		}).withMessage("Le demandeur n'existe pas");
+			pretServiceUnderTest.retournerOuvrage(1L, 2L, "");
+		}).withMessage("L'abonné n'existe pas");
 	}
 	
 	@Test
-	void retournerOuvrage_ShouldRaiseNotAllowedException_WhenAbonneIsNotUtilisateur()
+	void retournerOuvrage_ShouldRaiseNotAllowedException_WhenRequesterNotExists()
 	{
 		//arrange
 		Pret pret = new Pret();
-		Utilisateur pretAbonne = new Utilisateur();
-		pretAbonne.setId(2L);
-		pretAbonne.setRole(Role.ROLE_ABONNE);
-		pret.setAbonne(pretAbonne);
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(2L);
+		pret.setAbonne(abonne);
 		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
 		
-		Utilisateur abonne = new Utilisateur();
-		abonne.setId(9L);
-		abonne.setRole(Role.ROLE_ABONNE);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty());
 		
 		// act & assert
 		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.retournerOuvrage(1L, abonne.getId());
-		}).withMessage("Vous ne pouvez pas retourner ce prêt. Vous n'etes pas l'emprunteur");
+			pretServiceUnderTest.retournerOuvrage(1L, 2L, "");
+		}).withMessage("Vous n'etes pas correctement authentifié");
 	}
 	
 	@Test
-	void retournerOuvrage_ShouldSuccess_WhenAbonneIsUtilisateur() throws EntityNotFoundException, NotAllowedException
+	void retournerOuvrage_ShouldRaiseNotAllowedException_WhenRequesterIsNotAbonne()
 	{
 		//arrange
 		Pret pret = new Pret();
-		Utilisateur pretAbonne = new Utilisateur();
-		pretAbonne.setId(2L);
-		pretAbonne.setRole(Role.ROLE_ABONNE);
-		pret.setAbonne(pretAbonne);
-		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
-		
 		Utilisateur abonne = new Utilisateur();
 		abonne.setId(2L);
-		abonne.setRole(Role.ROLE_ABONNE);
+		abonne.setEmail("abonne@biblio.fr");
+		pret.setAbonne(abonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Utilisateur requester = new Utilisateur();
+		requester.setEmail("dummy@domain.tld");
+		requester.setRole(Role.ROLE_ABONNE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(requester));
+		
+		// act & assert
+		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.retournerOuvrage(1L, abonne.getId(), requester.getEmail());
+		}).withMessage("Vous ne pouvez pas retourner ce prêt. Vous n'etes pas l'emprunteur");
+	}
+	
+	
+	@Test
+	void retournerOuvrage_ShouldSuccess_WhenAbonneIsRequester() throws EntityNotFoundException, NotAllowedException
+	{
+		//arrange
+		Pret pret = new Pret();
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(2L);
+		abonne.setEmail("abonne@biblio.fr");
+		abonne.setRole(Role.ROLE_ABONNE);
+		pret.setAbonne(abonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(abonne));
 		
 		Ouvrage ouvrage = new Ouvrage();
 		ouvrage.setId(5L);
@@ -259,27 +338,28 @@ class PretServiceImplTest
 		Mockito.<Optional<Pret>>when(pretRepositoryMock.findNextReservationsByOuvrageId(Mockito.anyLong())).thenReturn(Optional.empty());
 		
 		// act
-		pretServiceUnderTest.retournerOuvrage(1L,  abonne.getId());
+		pretServiceUnderTest.retournerOuvrage(1L,  abonne.getId(), abonne.getEmail());
 		
 		// assert
 		Mockito.verify(pretRepositoryMock, Mockito.times(1)).findNextReservationsByOuvrageId(Mockito.anyLong());
 	}
 	
 	@Test
-	void retournerOuvrage_ShouldSuccess_WhenUtilisateurIsNotAbonne() throws EntityNotFoundException, NotAllowedException
+	void retournerOuvrage_ShouldSuccess_WhenRequesterIsEmploye() throws EntityNotFoundException, NotAllowedException
 	{
 		//arrange
 		Pret pret = new Pret();
-		Utilisateur pretAbonne = new Utilisateur();
-		pretAbonne.setId(2L);
-		pretAbonne.setRole(Role.ROLE_ABONNE);
-		pret.setAbonne(pretAbonne);
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(2L);
+		pret.setAbonne(abonne);
 		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
 		
-		Utilisateur abonne = new Utilisateur();
-		abonne.setId(9L);
-		abonne.setRole(Role.ROLE_EMPLOYE);
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Utilisateur requester = new Utilisateur();
+		requester.setEmail("dummy@domain.tld");
+		requester.setRole(Role.ROLE_EMPLOYE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(requester));
 		
 		Ouvrage ouvrage = new Ouvrage();
 		ouvrage.setId(5L);
@@ -290,7 +370,7 @@ class PretServiceImplTest
 		Mockito.<Optional<Pret>>when(pretRepositoryMock.findNextReservationsByOuvrageId(Mockito.anyLong())).thenReturn(Optional.empty());
 		
 		// act
-		pretServiceUnderTest.retournerOuvrage(1L,  abonne.getId());
+		pretServiceUnderTest.retournerOuvrage(1L,  abonne.getId(), requester.getEmail());
 		
 		// assert
 		Mockito.verify(pretRepositoryMock, Mockito.times(1)).findNextReservationsByOuvrageId(Mockito.anyLong());
@@ -301,16 +381,17 @@ class PretServiceImplTest
 	{
 		//arrange
 		Pret pret = new Pret();
-		Utilisateur pretAbonne = new Utilisateur();
-		pretAbonne.setId(2L);
-		pretAbonne.setRole(Role.ROLE_ABONNE);
-		pret.setAbonne(pretAbonne);
-		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
-		
 		Utilisateur abonne = new Utilisateur();
 		abonne.setId(2L);
-		abonne.setRole(Role.ROLE_ABONNE);
+		pret.setAbonne(abonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Utilisateur requester = new Utilisateur();
+		requester.setEmail("dummy@domain.tld");
+		requester.setRole(Role.ROLE_EMPLOYE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(requester));
 		
 		Ouvrage ouvrage = new Ouvrage();
 		ouvrage.setId(5L);
@@ -321,7 +402,7 @@ class PretServiceImplTest
 		Mockito.<Optional<Pret>>when(pretRepositoryMock.findNextReservationsByOuvrageId(Mockito.anyLong())).thenReturn(Optional.of(pret));
 		
 		// act
-		pretServiceUnderTest.retournerOuvrage(1L,  abonne.getId());
+		pretServiceUnderTest.retournerOuvrage(1L,  abonne.getId(), requester.getEmail());
 		
 		// assert
 		Mockito.verify(pretRepositoryMock, Mockito.times(2)).save(Mockito.any(Pret.class));
@@ -337,7 +418,7 @@ class PretServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.prolonger(1L, 2L);
+			pretServiceUnderTest.prolonger(1L, 2L, "");
 		}).withMessage("Le prêt n'existe pas");
 	}
 	
@@ -351,7 +432,7 @@ class PretServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(DelayLoanException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.prolonger(1L, 2L);
+			pretServiceUnderTest.prolonger(1L, 2L, "");
 		}).withMessage("Le prêt ne peut plus être prolongé");
 	}
 	
@@ -370,12 +451,12 @@ class PretServiceImplTest
 		// act & assert
 		assertThatExceptionOfType(DelayLoanException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.prolonger(1L, 2L);
+			pretServiceUnderTest.prolonger(1L, 2L, "");
 		}).withMessage("Le prêt ne peut plus être prolongé car il est en retard");
 	}
 	
 	@Test
-	void prolonger_ShouldRaiseEntityNotFoundException_WhenUtilisateurNotExistsRetard()
+	void prolonger_ShouldRaiseNotAllowedException_WhenRequesterNotExists()
 	{
 		//arrange
 		Pret pret = new Pret();
@@ -383,37 +464,38 @@ class PretServiceImplTest
 		pret.setDateFinPrevu(new Date());
 		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
 		
-		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-		
-		// act & assert
-		assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(() ->
-		{
-			pretServiceUnderTest.prolonger(1L, 2L);
-		}).withMessage("Le demandeur n'existe pas");
-	}
-	
-	@Test
-	void prolonger_ShouldRaiseNotAllowedException_WhenAbonneIsNotUtilisateur()
-	{
-		//arrange
-		Pret pret = new Pret();
-		pret.setProlongationsPossible(1);
-		pret.setDateFinPrevu(new Date());
-		Utilisateur pretAbonne = new Utilisateur();
-		pretAbonne.setId(2L);
-		pretAbonne.setRole(Role.ROLE_ABONNE);
-		pret.setAbonne(pretAbonne);
-		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
-		
-		Utilisateur abonne = new Utilisateur();
-		abonne.setId(9L);
-		abonne.setRole(Role.ROLE_ABONNE);
-		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty());
 		
 		// act & assert
 		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
 		{
-			pretServiceUnderTest.prolonger(1L, abonne.getId());
+			pretServiceUnderTest.prolonger(1L, 2L, "");
+		}).withMessage("Vous n'etes pas correctement authentifié");
+	}
+	
+	@Test
+	void prolonger_ShouldRaiseNotAllowedException_WhenAbonneIsNotRequester()
+	{
+		//arrange
+		Pret pret = new Pret();
+		pret.setProlongationsPossible(1);
+		pret.setDateFinPrevu(new Date());
+		Utilisateur abonne = new Utilisateur();
+		abonne.setId(2L);
+		abonne.setEmail("abonne@biblio.fr");
+		abonne.setRole(Role.ROLE_ABONNE);
+		pret.setAbonne(abonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Utilisateur requester = new Utilisateur();
+		requester.setEmail("dummy@domain.tld");
+		requester.setRole(Role.ROLE_ABONNE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(requester));
+		
+		// act & assert
+		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		{
+			pretServiceUnderTest.prolonger(1L, abonne.getId(), requester.getEmail());
 		}).withMessage("Vous ne pouvez pas prolonger ce prêt. Vous n'etes pas l'emprunteur");
 	}
 	
@@ -425,49 +507,43 @@ class PretServiceImplTest
 		pret.setProlongationsPossible(1);
 		pret.setDateDebut(new Date());
 		pret.setDateFinPrevu(new Date());
-		Utilisateur pretAbonne = new Utilisateur();
-		pretAbonne.setId(2L);
-		pretAbonne.setRole(Role.ROLE_ABONNE);
-		pret.setAbonne(pretAbonne);
-		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
-		
 		Utilisateur abonne = new Utilisateur();
 		abonne.setId(2L);
+		abonne.setEmail("dummy@domain.tld");
 		abonne.setRole(Role.ROLE_ABONNE);
-		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		pret.setAbonne(abonne);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
+		
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(abonne));
 		
 		Mockito.when(pretRepositoryMock.save(Mockito.any(Pret.class))).thenReturn(pret);
 		
 		// act
-		pretServiceUnderTest.prolonger(1L,  abonne.getId());
+		pretServiceUnderTest.prolonger(1L,  abonne.getId(), abonne.getEmail());
 		
 		// assert
 		Mockito.verify(pretRepositoryMock, Mockito.times(1)).save(Mockito.any(Pret.class));
 	}
 	
 	@Test
-	void prolonger_ShouldSuccess_WhenUtilisateurIsEmploye() throws EntityNotFoundException, DelayLoanException, NotAllowedException
+	void prolonger_ShouldSuccess_WhenRequesterIsEmploye() throws EntityNotFoundException, DelayLoanException, NotAllowedException
 	{
 		//arrange
 		Pret pret = new Pret();
 		pret.setProlongationsPossible(1);
 		pret.setDateDebut(new Date());
 		pret.setDateFinPrevu(new Date());
-		Utilisateur pretAbonne = new Utilisateur();
-		pretAbonne.setId(2L);
-		pretAbonne.setRole(Role.ROLE_ABONNE);
-		pret.setAbonne(pretAbonne);
 		Mockito.<Optional<Pret>>when(pretRepositoryMock.findByIdAndEnPret(Mockito.anyLong())).thenReturn(Optional.of(pret));
 		
-		Utilisateur abonne = new Utilisateur();
-		abonne.setId(9L);
-		abonne.setRole(Role.ROLE_EMPLOYE);
-		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		Utilisateur requester = new Utilisateur();
+		requester.setEmail("dummy@domain.tld");
+		requester.setRole(Role.ROLE_EMPLOYE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(requester));
 		
 		Mockito.when(pretRepositoryMock.save(Mockito.any(Pret.class))).thenReturn(pret);
 		
 		// act
-		pretServiceUnderTest.prolonger(1L,  abonne.getId());
+		pretServiceUnderTest.prolonger(1L,  2L, requester.getEmail());
 		
 		// assert
 		Mockito.verify(pretRepositoryMock, Mockito.times(1)).save(Mockito.any(Pret.class));

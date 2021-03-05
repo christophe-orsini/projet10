@@ -107,11 +107,8 @@ public class PretServiceImpl implements PretService
 	@Transactional
 	public void retournerOuvrage(Long pretId, Long utilisateurId, String requesterName) throws EntityNotFoundException, NotAllowedException
 	{
-		Optional<Pret> pret = pretRepository.findById(pretId);
+		Optional<Pret> pret = pretRepository.findByIdAndEnPret(pretId);
 		if (!pret.isPresent()) throw new EntityNotFoundException("Le prêt n'existe pas");
-		
-		// verifier si le pret n'est pas déja retourné
-		if (pret.get().getStatut() == Statut.RETOURNE) throw new EntityNotFoundException("Le prêt n'existe pas");
 		
 		// verifier si l'abonne existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(utilisateurId);
@@ -153,7 +150,7 @@ public class PretServiceImpl implements PretService
 		// verifier si le pret est en retard
 		LocalDate now = LocalDate.now();
 		LocalDate finPrevu = Instant.ofEpochMilli(pret.get().getDateFinPrevu().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
-		if (finPrevu.isBefore(now)) throw new DelayLoanException("Le prêt ne peut plus être prolongé");
+		if (finPrevu.isBefore(now)) throw new DelayLoanException("Le prêt ne peut plus être prolongé car il est en retard");
 		
 		// verifier si le demandeur est l'emprunteur ou un employé
 		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
