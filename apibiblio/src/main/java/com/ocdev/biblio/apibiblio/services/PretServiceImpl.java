@@ -44,7 +44,8 @@ public class PretServiceImpl implements PretService
 	
 	@Override
 	@Transactional
-	public Pret creer(Long abonneId, Long ouvrageId) throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException
+	public Pret creer(Long abonneId, Long ouvrageId, String requesterName) throws AlreadyExistsException, EntityNotFoundException,
+		NotEnoughCopiesException, NotAllowedException
 	{
 		// verfifier si l'abonné existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
@@ -58,6 +59,12 @@ public class PretServiceImpl implements PretService
 		Optional<Pret> pretExists = pretRepository.findByAbonneIdAndOuvrageIdAndEnPret(abonneId, ouvrageId);
 		if (pretExists.isPresent()) throw new AlreadyExistsException("Un prêt en cours existe déjà pour cet abonné et cet ouvrage");		
 			
+		// verifier si le demandeur est l'emprunteur ou un employé
+		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
+				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
+		if (requester.getRole() == Role.ROLE_ABONNE && !abonne.get().getEmail().equals(requesterName))
+			throw new NotAllowedException("Vous ne pouvez pas créer ce prêt. Vous n'etes pas l'emprunteur");
+				
 		// verifier s'il y a assez d'exemplaires d'ouvrage
 		if (ouvrage.get().getNbreExemplaire() < 1) throw new NotEnoughCopiesException("Pas assez d'exemplaires pour le prêt de cet ouvrage");
 		
@@ -88,7 +95,7 @@ public class PretServiceImpl implements PretService
 
 	@Override
 	@Transactional
-	public void retournerOuvrage(Long pretId, Long utilisateurId) throws EntityNotFoundException, NotAllowedException
+	public void retournerOuvrage(Long pretId, Long utilisateurId, String requesterName) throws EntityNotFoundException, NotAllowedException
 	{
 		Optional<Pret> pret = pretRepository.findById(pretId);
 		if (!pret.isPresent()) throw new EntityNotFoundException("Le prêt n'existe pas");
@@ -96,13 +103,15 @@ public class PretServiceImpl implements PretService
 		// verifier si le pret n'est pas déja retourné
 		if (pret.get().getStatut() == Statut.RETOURNE) throw new EntityNotFoundException("Le prêt n'existe pas");
 		
-		// verifier si le demandeur existe
-		Optional<Utilisateur> demandeur = utilisateurRepository.findById(utilisateurId);
-		if (!demandeur.isPresent()) throw new EntityNotFoundException("Le demandeur n'existe pas");
+		// verifier si l'abonne existe
+		Optional<Utilisateur> abonne = utilisateurRepository.findById(utilisateurId);
+		if (!abonne.isPresent()) throw new EntityNotFoundException("L'abonné n'existe pas");
 		
 		// verifier si le demandeur est l'emprunteur ou un employé
-		Utilisateur emprunteur = pret.get().getAbonne();
-		if (demandeur.get().getRole() == Role.ROLE_ABONNE && demandeur.get().getId() != emprunteur.getId())
+		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
+				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
+		if (requester.getRole() == Role.ROLE_ABONNE && 
+				(abonne.get().getId() != pret.get().getAbonne().getId() || !pret.get().getAbonne().getEmail().equals(requesterName)))
 			throw new NotAllowedException("Vous ne pouvez pas retourner ce prêt. Vous n'etes pas l'emprunteur");
 				
 		// mettre a jour le nombre d'exemplaires
@@ -123,7 +132,7 @@ public class PretServiceImpl implements PretService
 	}
 
 	@Override
-	public Pret prolonger(Long pretId, Long utilisateurId) throws EntityNotFoundException, DelayLoanException, NotAllowedException
+	public Pret prolonger(Long pretId, Long utilisateurId, String requesterName) throws EntityNotFoundException, DelayLoanException, NotAllowedException
 	{
 		Optional<Pret> pret = pretRepository.findById(pretId);
 		if (!pret.isPresent()) throw new EntityNotFoundException("Le prêt n'existe pas");
@@ -137,8 +146,11 @@ public class PretServiceImpl implements PretService
 		if (finPrevu.isBefore(now)) throw new DelayLoanException("Le prêt ne peut plus être prolongé");
 		
 		// verifier si le demandeur est l'emprunteur ou un employé
-		Utilisateur utilisateur = pret.get().getAbonne();
-		if (utilisateur.getRole() == Role.ROLE_ABONNE && utilisateur.getId() != utilisateurId) throw new NotAllowedException("Vous ne pouvez pas prolonger ce prêt. Vous n'etes pas l'emprunteur");
+		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
+				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
+		if (requester.getRole() == Role.ROLE_ABONNE && 
+				(pret.get().getAbonne().getId() != utilisateurId || !pret.get().getAbonne().getEmail().equals(requesterName)))
+			throw new NotAllowedException("Vous ne pouvez pas prolonger ce prêt. Vous n'etes pas l'emprunteur");
 		
 		// prolongation
 		Calendar c = Calendar.getInstance();
@@ -157,11 +169,17 @@ public class PretServiceImpl implements PretService
 	}
 
 	@Override
-	public Page<Pret> listerSesPrets(Long abonneId, Pageable paging) throws EntityNotFoundException
+	public Page<Pret> listerSesPrets(Long abonneId, Pageable paging, String requesterName) throws EntityNotFoundException, NotAllowedException
 	{
 		// verifier si l'abonné existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
 		if (!abonne.isPresent()) throw new EntityNotFoundException("L'abonné n'existe pas");
+		
+		// verifier si le demandeur est l'emprunteur ou un employé
+		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
+				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
+		if (requester.getRole() == Role.ROLE_ABONNE && (requester.getId() != abonneId || !abonne.get().getEmail().equals(requesterName)))
+			throw new NotAllowedException("Vous ne pouvez pas lister les prêts d'un autre abonné");
 		
 		return pretRepository.findAllPretsByAbonneId(abonneId, paging);
 	}
