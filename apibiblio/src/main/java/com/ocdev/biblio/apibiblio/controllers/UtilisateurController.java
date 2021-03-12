@@ -58,15 +58,14 @@ public class UtilisateurController
 			notes = "Vérifier le login d'un utilisateur et obtenir ses droits")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "L'utilisateur est authentifié"),
-			@ApiResponse(code = 401, message = "Le login et/ou le mot de passe sont incorrects"),
-			@ApiResponse(code = 403, message = "L'URI necessite une Basic Authentication")
+			@ApiResponse(code = 401, message = "Le login et/ou le mot de passe sont incorrects")
 			})
 	@PostMapping(value = "/checklogin", produces = "application/json")
 	public ResponseEntity<String> checkLogin(Principal principal)
 	{
 		if (principal == null)
 		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 		
 		return ResponseEntity.status(HttpStatus.OK).build();

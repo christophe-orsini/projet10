@@ -41,7 +41,7 @@ public class OuvrageController
 	@ApiOperation(value = "Ajout d'un ouvrage", notes = "Ajout d'un nouvel ouvrage")
 	@ApiResponses(value = {
 			@ApiResponse(code = 201, message = "L'ouvrage est correctement créé"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "Le thème n'existe pas"),
 			@ApiResponse(code = 460, message = "Un ouvrage avec le même titre existe déjà")
 			})
@@ -55,7 +55,7 @@ public class OuvrageController
 	@ApiOperation(value = "Consultation d'un ouvrage", notes = "Obtenir les détails d'un ouvrage")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "L'ouvrage trouvé est retourné dans le corps de la réponse"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "L'ouvrage ou l'utilisateur avec cet ID n'existe pas"),
 			@ApiResponse(code = 469, message = "Le demandeur autentifié n'est pas l'abonné")
 			})
@@ -73,7 +73,7 @@ public class OuvrageController
 	@ApiOperation(value = "Recherche d'ouvrages", notes = "Obtenir une liste d'ouvrages correspondant à plusieurs critères de recherche")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "La liste des ouvrages est retourné dans le corps de la réponse"),
-			@ApiResponse(code = 403, message = "Authentification requise")
+			@ApiResponse(code = 401, message = "Authentification requise")
 			})
 	@PostMapping(value = "/ouvrages/search", produces = "application/json")
 	public ResponseEntity<Page<Ouvrage>> rechercherOuvrages(@RequestBody final OuvrageCriteria ouvrageCriteria, 

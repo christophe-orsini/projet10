@@ -37,7 +37,7 @@ public class ThemeController
 	@ApiOperation(value = "Ajout d'un thème", notes = "Ajout d'un nouveau thème")
 	@ApiResponses(value = {
 			@ApiResponse(code = 201, message = "Le thème est correctement créé"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 409, message = "Un thème avec le même nom existe déjà")
 			})
 	@PostMapping(value ="/themes", produces = "application/json")
@@ -60,7 +60,7 @@ public class ThemeController
 	@ApiOperation(value = "Liste des thèmes", notes = "Obtenir la liste des thèmes")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "La liste des thèmes est retournée dans le corps de la réponse"),
-			@ApiResponse(code = 403, message = "Authentification requise")
+			@ApiResponse(code = 401, message = "Authentification requise")
 			})
 	@GetMapping(value = "/themes", produces = "application/json")
 	public ResponseEntity<Page<Theme>> getThemes(@RequestParam(required = false, defaultValue = "0") int page,
