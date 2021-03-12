@@ -246,7 +246,10 @@ public class PretServiceImpl implements PretService
 		// verifier que la file d'attente n'est pas pleine RG2
 		int nbreReservation = pretRepository.findAllReservationsByOuvrageId(ouvrageId).size();
 		int nbreMaxiReservation = ouvrage.get().getNbreExemplaireTotal() * AppSettings.getIntSetting("reservation.multiple");
-		if (nbreReservation >= nbreMaxiReservation)throw new FullWaitingQueueException("Nombre de réservation maximale atteinte pour cet ouvrage");
+		if (nbreReservation >= nbreMaxiReservation) 
+			{
+			throw new FullWaitingQueueException("Nombre de réservation maximale atteinte pour cet ouvrage");
+			}
 		
 		// initialisation du pret
 		Pret pret = new Pret(abonne.get(), ouvrage.get());
@@ -269,7 +272,7 @@ public class PretServiceImpl implements PretService
 		if (!reservation.isPresent()) throw new EntityNotFoundException("La réservation n'existe pas");
 		
 		// verifier si la réservation est toujours en cours
-		if (!reservation.get().getStatut().isReserve()) throw new EntityNotFoundException("La réservation n'existe pas");;
+		if (!reservation.get().getStatut().isReserve()) throw new EntityNotFoundException("Ce pret n'est pas une réservation");;
 		
 		// verifier si le demandeur existe
 		Optional<Utilisateur> demandeur = utilisateurRepository.findById(utilisateurId);
@@ -360,8 +363,10 @@ public class PretServiceImpl implements PretService
 				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
 		if (requester.getRole() == Role.ROLE_ABONNE && 
 				(demandeur.get().getId() != reservation.get().getAbonne().getId() ||!demandeur.get().getEmail().equals(requesterName)))
+		{
 			throw new NotAllowedException("Vous ne pouvez pas retirer cette réservation. Vous n'etes pas l'abonné");
-				
+		}
+			
 		// changer statut
 		reservation.get().setStatut(Statut.EN_COURS);
 		
