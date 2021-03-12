@@ -48,6 +48,12 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
 		<resources>
 	        <resource>
 	            <directory>src/main/resources</directory>
