@@ -1,9 +1,9 @@
 package com.ocdev.biblio.apibiblio.services;
 
-import javax.persistence.EntityNotFoundException;
 import com.ocdev.biblio.apibiblio.dto.UtilisateurCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
+import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
 
 /**
  * Interface de déclaration des services pour les utilisateurs
