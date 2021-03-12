@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -40,6 +41,7 @@ public class ThemeController
 			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 409, message = "Un thème avec le même nom existe déjà")
 			})
+	@ResponseStatus(value = HttpStatus.CREATED)
 	@PostMapping(value ="/themes", produces = "application/json")
 	public ResponseEntity<Theme> ajouterTheme(@Valid @RequestBody final ThemeCreateDto themeCreateDto) throws AlreadyExistsException
 	{

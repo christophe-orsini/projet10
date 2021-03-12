@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.ocdev.biblio.apibiblio.criterias.OuvrageCriteria;
 import com.ocdev.biblio.apibiblio.dto.OuvrageConsultDto;
@@ -45,6 +46,7 @@ public class OuvrageController
 			@ApiResponse(code = 404, message = "Le thème n'existe pas"),
 			@ApiResponse(code = 460, message = "Un ouvrage avec le même titre existe déjà")
 			})
+	@ResponseStatus(value = HttpStatus.CREATED)
 	@PostMapping(value ="/ouvrages", produces = "application/json")
 	public ResponseEntity<Ouvrage> ajouterOuvrage(@Valid @RequestBody final OuvrageCreateDto ouvrageCreateDto) throws AlreadyExistsException, EntityNotFoundException
 	{
