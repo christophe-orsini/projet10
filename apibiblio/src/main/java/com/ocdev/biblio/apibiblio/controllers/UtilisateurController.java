@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.ocdev.biblio.apibiblio.dto.UtilisateurCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
@@ -33,6 +34,7 @@ public class UtilisateurController
 			@ApiResponse(code = 201, message = "L'utilisateur est correctement inscrit"),
 			@ApiResponse(code = 460, message = "Un utilisateur avec le même email existe déjà")
 			})
+	@ResponseStatus(value = HttpStatus.CREATED)
 	@PostMapping(value = "/utilisateurs", produces = "application/json")
 	public ResponseEntity<Utilisateur> inscrire(@Valid @RequestBody UtilisateurCreateDto utilisateurDto) throws AlreadyExistsException
 	{
@@ -58,15 +60,14 @@ public class UtilisateurController
 			notes = "Vérifier le login d'un utilisateur et obtenir ses droits")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "L'utilisateur est authentifié"),
-			@ApiResponse(code = 401, message = "Le login et/ou le mot de passe sont incorrects"),
-			@ApiResponse(code = 403, message = "L'URI necessite une Basic Authentication")
+			@ApiResponse(code = 401, message = "Le login et/ou le mot de passe sont incorrects")
 			})
 	@PostMapping(value = "/checklogin", produces = "application/json")
 	public ResponseEntity<String> checkLogin(Principal principal)
 	{
 		if (principal == null)
 		{
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 		
 		return ResponseEntity.status(HttpStatus.OK).build();

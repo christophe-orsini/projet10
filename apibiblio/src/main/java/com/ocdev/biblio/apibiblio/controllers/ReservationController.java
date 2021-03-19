@@ -20,10 +20,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.ocdev.biblio.apibiblio.dto.ReservationDto;
 import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
+import com.ocdev.biblio.apibiblio.errors.AvailableException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
 import com.ocdev.biblio.apibiblio.errors.FullWaitingQueueException;
 import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
@@ -44,18 +46,20 @@ public class ReservationController
 	@ApiOperation(value = "Réservation d'un ouvrage", notes = "Réservation d'un ouvrage")
 	@ApiResponses(value = {
 			@ApiResponse(code = 201, message = "La réservation est enregistrée"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "L'abonné et/ou l'ouvrage n'existe pas"),
 			@ApiResponse(code = 460, message = "Réservation impossible car une prêt en cours existe déjà pour cet ouvrage et cet abonné"),
 			@ApiResponse(code = 462, message = "Pas assez d'exemplaires pour la réservation de cet ouvrage"),
 			@ApiResponse(code = 463, message = "Nombre maximum de réservation atteint pour cet ouvrage"),
-			@ApiResponse(code = 469, message = "Ouvrage avec exemplaire disponible")
+			@ApiResponse(code = 464, message = "Ouvrage avec exemplaire disponible"),
+			@ApiResponse(code = 469, message = "Seul l'abonné ou un employé peuvent reserver un ouvrage")
 			})
+	@ResponseStatus(value = HttpStatus.CREATED)
 	@PutMapping(value = "/reservations/abonne/{abonneId}/ouvrage/{ouvrageId}", produces = "application/json" )
 	public ResponseEntity<Pret> reserver(@ApiParam(value = "ID de l'abonné", required = true, example = "1") @PathVariable @Min(1) final Long abonneId, 
 			@ApiParam(value = "ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final Long ouvrageId,
 			Principal requester)
-					throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException
+					throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException, AvailableException
 	{
 		String requesterName = requester.getName();
 		Pret result = pretService.reserver(abonneId, ouvrageId, requesterName);
@@ -65,7 +69,7 @@ public class ReservationController
 	@ApiOperation(value = "Annulation d'une réservation", notes = "Annulation d'une réservation")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "L'annulation de la réservation est enregistrée"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "La réservation n'existe pas"),
 			@ApiResponse(code = 469, message = "Seul la personne qui a réservé ou un employé peuvent annuler une réservation")
 			})
@@ -83,7 +87,7 @@ public class ReservationController
 	@ApiOperation(value = "Liste des réservations", notes = "Obtenir la liste des réservations pour un abonné")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "La liste des réservations est retourné dans le corps de la réponse"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "L'abonné n'existe pas"),
 			@ApiResponse(code = 469, message = "Seul l'abonné ou un employé peuvent lister ses réservations")
 			})
@@ -103,7 +107,7 @@ public class ReservationController
 	@ApiOperation(value = "Retirer une réservation devenue disponible", notes = "Permet de retirer une réservation devenue disponible")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "Le prêt est enregistré"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "La réservation n'existe pas"),
 			@ApiResponse(code = 469, message = "Seul la personne qui a réservé ou un employé peuvent retirer une réservation")
 			})
@@ -120,7 +124,8 @@ public class ReservationController
 	
 	@ApiOperation(value = "Réservations disponibles", notes = "Liste des réservations disponibles pour envoi d'email")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "La liste est retournée dans le corps de la réponse")
+			@ApiResponse(code = 200, message = "La liste est retournée dans le corps de la réponse"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			})
 	@GetMapping(value ="/reservations/disponible", produces = "application/json")
 	public ResponseEntity<Collection<Pret>> reservationsDisponibles()
@@ -132,7 +137,7 @@ public class ReservationController
 	@ApiOperation(value = "Enregistrer l'envoi d'un email pour une liste de réservations", notes = "Enregistre l'envoi d'un email par le traitement batch lorsque une réservation est devenue disponible")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "L'envoi d'email est enregistré pour la liste"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			})
 	@PostMapping(value ="/reservations/enregistrer/emails/envoyes", produces = "application/json")
 	public ResponseEntity<?> enregistrerEmailEnvoye(@Valid @RequestBody final Collection<Long> reservationsIDs)
@@ -144,7 +149,7 @@ public class ReservationController
 	@ApiOperation(value = "Annuler une liste de réservations échues", notes = "Annule une liste de réservations échues")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "La liste des réservations est annulée"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			})
 	@PostMapping(value ="/reservations/annuler", produces = "application/json")
 	public ResponseEntity<?> annulerReservations(@Valid @RequestBody final Collection<Long> reservationsIDs)

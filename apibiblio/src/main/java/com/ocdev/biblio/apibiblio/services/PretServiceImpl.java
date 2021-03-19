@@ -25,6 +25,7 @@ import com.ocdev.biblio.apibiblio.entities.Role;
 import com.ocdev.biblio.apibiblio.entities.Statut;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
+import com.ocdev.biblio.apibiblio.errors.AvailableException;
 import com.ocdev.biblio.apibiblio.errors.DelayLoanException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
 import com.ocdev.biblio.apibiblio.errors.FullWaitingQueueException;
@@ -213,7 +214,7 @@ public class PretServiceImpl implements PretService
 	@Override
 	@Transactional
 	public Pret reserver(Long abonneId, Long ouvrageId, String requesterName)
-			throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException
+			throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException, AvailableException
 	{
 		// verfifier si l'abonné existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
@@ -230,7 +231,7 @@ public class PretServiceImpl implements PretService
 			throw new NotAllowedException("Vous ne pouvez pas réserver cet ouvrage. Vous n'etes pas l'abonné");
 				
 		// vérifier que l'ouvrage est indisponible RG8
-		if (ouvrage.get().getNbreExemplaire() > 0) throw new NotAllowedException("Cet ouvrage est disponible");
+		if (ouvrage.get().getNbreExemplaire() > 0) throw new AvailableException("Cet ouvrage est disponible");
 		
 		// recherche si un pret en cours existe deja RG3
 		Optional<Pret> pretExists = pretRepository.findByAbonneIdAndOuvrageIdAndEnPret(abonneId, ouvrageId);
