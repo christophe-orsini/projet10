@@ -327,6 +327,7 @@ public class PretServiceImpl implements PretService
 						
 			Optional<Pret> prochainRetour = pretRepository.findFirstPretByOuvrageId(reservation.getOuvrage().getId());
 			
+			// TODO verifier si retourne ouvrage complet
 			ReservationDto reservationDto = reservationConverter.convertEntityToDto(reservation);
 			reservationDto.setRang(++rang);
 			if (prochainRetour.isPresent())
