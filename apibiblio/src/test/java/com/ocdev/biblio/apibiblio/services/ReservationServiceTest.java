@@ -808,4 +808,44 @@ class ReservationServiceTest
 		// assert
 		Mockito.verify(pretRepositoryMock, Mockito.times(1)).findById(5L);	
 	}
+	
+	@Test
+	void annulerReservations_ShouldSetStatutAnnule_WhenSuccess() throws EntityNotFoundException, NotAllowedException
+	{
+		//arrange
+		Pret reservation = new Pret();
+		reservation.setId(5L);
+		reservation.setStatut(Statut.RESERVE);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(reservation));
+		
+		Utilisateur abonne = new Utilisateur();
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(abonne));
+		
+		Utilisateur requester = new Utilisateur();
+		requester.setId(2L);
+		requester.setEmail("dummy@domain.tld");
+		requester.setRole(Role.ROLE_EMPLOYE);
+		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(requester));
+		
+		Mockito.when(pretRepositoryMock.save(Mockito.any(Pret.class))).thenReturn(reservation);
+		
+		Ouvrage ouvrage = new Ouvrage();
+		ouvrage.setId(1L);
+		reservation.setOuvrage(ouvrage);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findNextReservationsByOuvrageId(Mockito.anyLong())).thenReturn(Optional.empty());
+		
+		Collection<Long> reservationIDs = new ArrayList<Long>();
+		reservationIDs.add(5L);
+		
+		reservation.setAbonne(requester);
+		Mockito.<Optional<Pret>>when(pretRepositoryMock.findById(Mockito.anyLong())).thenReturn(Optional.of(reservation));
+		
+		// act
+		pretServiceUnderTest.annulerReservations(reservationIDs);
+		
+		// assert
+		assertThat(reservation.getStatut()).isEqualTo(Statut.ANNULEE);
+		Mockito.verify(pretRepositoryMock, Mockito.times(1)).save(reservation);
+		Mockito.verify(pretRepositoryMock, Mockito.times(2)).findById(5L);	
+	}
 }
