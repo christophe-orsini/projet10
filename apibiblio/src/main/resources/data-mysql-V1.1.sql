@@ -37,6 +37,6 @@ INSERT INTO pret (id, date_heure_reservation, date_debut, date_fin_prevu, date_r
 INSERT INTO pret (id, date_heure_reservation, date_heure_expiration, statut, email_envoye,  abonne_id, ouvrage_id, periodes, prolongations_possible) VALUES
 (7, "2021-03-09 09:53:00", NULL, "RESERVE", 0, 3, 3, 0, 0),
 (8, "2021-03-16 10:21:00", NULL, "RESERVE", 0, 1, 3, 0, 0),
-(9, "2021-03-13 14:17:00", "2021-03-18 08:30:00", "DISPONIBLE", 1, 1, 5, 0, 0);
+(9, "2021-03-13 14:17:00", "2021-03-18 08:30:00", "DISPONIBLE", 0, 1, 5, 0, 0);
 
 

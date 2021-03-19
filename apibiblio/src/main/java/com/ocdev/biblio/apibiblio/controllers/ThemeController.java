@@ -39,7 +39,7 @@ public class ThemeController
 	@ApiResponses(value = {
 			@ApiResponse(code = 201, message = "Le thème est correctement créé"),
 			@ApiResponse(code = 401, message = "Authentification requise"),
-			@ApiResponse(code = 409, message = "Un thème avec le même nom existe déjà")
+			@ApiResponse(code = 460, message = "Un thème avec le même nom existe déjà")
 			})
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@PostMapping(value ="/themes", produces = "application/json")
