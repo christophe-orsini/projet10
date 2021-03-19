@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ocdev.biblio.apibiblio.dto.ReservationDto;
 import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
+import com.ocdev.biblio.apibiblio.errors.AvailableException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
 import com.ocdev.biblio.apibiblio.errors.FullWaitingQueueException;
 import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
@@ -50,14 +51,15 @@ public class ReservationController
 			@ApiResponse(code = 460, message = "Réservation impossible car une prêt en cours existe déjà pour cet ouvrage et cet abonné"),
 			@ApiResponse(code = 462, message = "Pas assez d'exemplaires pour la réservation de cet ouvrage"),
 			@ApiResponse(code = 463, message = "Nombre maximum de réservation atteint pour cet ouvrage"),
-			@ApiResponse(code = 469, message = "Ouvrage avec exemplaire disponible")
+			@ApiResponse(code = 464, message = "Ouvrage avec exemplaire disponible"),
+			@ApiResponse(code = 469, message = "Seul l'abonné ou un employé peuvent reserver un ouvrage")
 			})
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@PutMapping(value = "/reservations/abonne/{abonneId}/ouvrage/{ouvrageId}", produces = "application/json" )
 	public ResponseEntity<Pret> reserver(@ApiParam(value = "ID de l'abonné", required = true, example = "1") @PathVariable @Min(1) final Long abonneId, 
 			@ApiParam(value = "ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final Long ouvrageId,
 			Principal requester)
-					throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException
+					throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException, AvailableException
 	{
 		String requesterName = requester.getName();
 		Pret result = pretService.reserver(abonneId, ouvrageId, requesterName);

@@ -24,6 +24,7 @@ import com.ocdev.biblio.apibiblio.entities.Role;
 import com.ocdev.biblio.apibiblio.entities.Statut;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
+import com.ocdev.biblio.apibiblio.errors.AvailableException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
 import com.ocdev.biblio.apibiblio.errors.FullWaitingQueueException;
 import com.ocdev.biblio.apibiblio.errors.NotAllowedException;
@@ -123,7 +124,7 @@ class ReservationServiceTest
 	}
 	
 	@Test
-	void reserver_ShouldRaiseNotAllowedException_WhenOuvrageIsDisponible()
+	void reserver_ShouldRaiseAvailableException_WhenOuvrageIsDisponible()
 	{
 		//arrange
 		Utilisateur abonne = new Utilisateur();
@@ -139,7 +140,7 @@ class ReservationServiceTest
 		Mockito.<Optional<Utilisateur>>when(utilisateurRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(requester));
 		
 		// act & assert
-		assertThatExceptionOfType(NotAllowedException.class).isThrownBy(() ->
+		assertThatExceptionOfType(AvailableException.class).isThrownBy(() ->
 		{
 			pretServiceUnderTest.reserver(2L, 1L, requester.getEmail());
 		}).withMessage("Cet ouvrage est disponible");
@@ -264,7 +265,7 @@ class ReservationServiceTest
 	}
 	
 	@Test
-	void reserver_ShouldReturnNewResrvation_WhenSuccess() throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException
+	void reserver_ShouldReturnNewResrvation_WhenSuccess() throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException, AvailableException
 	{
 		//arrange
 		Utilisateur abonne = new Utilisateur();
