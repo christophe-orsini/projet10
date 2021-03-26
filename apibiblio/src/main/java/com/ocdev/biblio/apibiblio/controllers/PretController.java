@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
@@ -41,12 +42,13 @@ public class PretController
 	@ApiOperation(value = "Création d'un prêt", notes = "Création d'un nouveau prêt")
 	@ApiResponses(value = {
 			@ApiResponse(code = 201, message = "Le prêt est correctement créé"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "L'abonné et/ou l'ouvrage n'existe pas"),
 			@ApiResponse(code = 460, message = "Un prêt en cours existe déjà pour cet ouvrage et cet abonné"),
 			@ApiResponse(code = 462, message = "Pas assez d'exemplaires pour le prêt de cet ouvrage"),
 			@ApiResponse(code = 469, message = "Le demandeur autentifié n'est pas l'abonné")
 			})
+	@ResponseStatus(value = HttpStatus.CREATED)
 	@PutMapping(value = "/prets/abonne/{abonneId}/ouvrage/{ouvrageId}", produces = "application/json" )
 	public ResponseEntity<Pret> pret(@ApiParam(value = "ID de l'abonné", required = true, example = "1") @PathVariable @Min(1) final Long abonneId, 
 			@ApiParam(value = "ID de l'ouvrage", required = true, example = "1") @PathVariable @Min(1) final Long ouvrageId,
@@ -60,7 +62,7 @@ public class PretController
 	@ApiOperation(value = "Retour d'un prêt", notes = "Retour d'un prêt")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "Le retour du prêt est enregistré"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "Le prêt n'existe pas"),
 			@ApiResponse(code = 469, message = "Seul l'emprunteur authentifié peut retourner son prêt")
 			})
@@ -77,7 +79,7 @@ public class PretController
 	@ApiOperation(value = "Liste des prêts", notes = "Obtenir la liste des prêts pour un abonné")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "La liste des prêts est retourné dans le corps de la réponse"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "L'abonné n'existe pas"),
 			@ApiResponse(code = 469, message = "Seul l'emprunteur authentifié peut lister ses prêts")
 			})
@@ -98,7 +100,7 @@ public class PretController
 	@ApiOperation(value = "Prolongation d'un prêt", notes = "Prolongation d'un prêt pour une nouvelle période")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "La prolongation du prêt est enregistrée"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
+			@ApiResponse(code = 401, message = "Authentification requise"),
 			@ApiResponse(code = 404, message = "Le prêt n'existe pas"),
 			@ApiResponse(code = 461, message = "Le prêt ne peut plus être prolongé"),
 			@ApiResponse(code = 469, message = "Seul l'emprunteur authentifié peut prolonger son prêt")
@@ -115,7 +117,8 @@ public class PretController
 	
 	@ApiOperation(value = "Prêts en retard", notes = "Liste des prêts avec date de fin postérieur à une date")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "La liste est retournée dans le corps de la réponse")
+			@ApiResponse(code = 200, message = "La liste est retournée dans le corps de la réponse"),
+			@ApiResponse(code = 401, message = "Authentification requise")
 			})
 	@GetMapping(value ="/prets/retard", produces = "application/json")
 	public ResponseEntity<Collection<Pret>> pretsEnRetard(@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") final Date dateMaxi)

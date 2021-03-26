@@ -1,4 +1,4 @@
-package com.ocdev.biblio.apibiblio.services;
+ package com.ocdev.biblio.apibiblio.services;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,7 +18,6 @@ import com.ocdev.biblio.apibiblio.assemblers.IDtoConverter;
 import com.ocdev.biblio.apibiblio.dao.OuvrageRepository;
 import com.ocdev.biblio.apibiblio.dao.PretRepository;
 import com.ocdev.biblio.apibiblio.dao.UtilisateurRepository;
-import com.ocdev.biblio.apibiblio.dto.PretDto;
 import com.ocdev.biblio.apibiblio.dto.ReservationDto;
 import com.ocdev.biblio.apibiblio.entities.Ouvrage;
 import com.ocdev.biblio.apibiblio.entities.Pret;
@@ -26,6 +25,7 @@ import com.ocdev.biblio.apibiblio.entities.Role;
 import com.ocdev.biblio.apibiblio.entities.Statut;
 import com.ocdev.biblio.apibiblio.entities.Utilisateur;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
+import com.ocdev.biblio.apibiblio.errors.AvailableException;
 import com.ocdev.biblio.apibiblio.errors.DelayLoanException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
 import com.ocdev.biblio.apibiblio.errors.FullWaitingQueueException;
@@ -36,11 +36,22 @@ import com.ocdev.biblio.apibiblio.utils.AppSettings;
 @Service
 public class PretServiceImpl implements PretService
 {
-	@Autowired PretRepository pretRepository;
-	@Autowired OuvrageRepository ouvrageRepository;
-	@Autowired UtilisateurRepository utilisateurRepository;
-	@Autowired IDtoConverter<Pret, PretDto> pretConverter;
-	@Autowired private IDtoConverter<Pret, ReservationDto> reservationConverter;
+	private PretRepository pretRepository;
+	private OuvrageRepository ouvrageRepository;
+	private UtilisateurRepository utilisateurRepository;
+	private IDtoConverter<Pret, ReservationDto> reservationConverter;
+	
+	public PretServiceImpl(
+			@Autowired PretRepository pretRepository,
+			@Autowired OuvrageRepository ouvrageRepository,
+			@Autowired UtilisateurRepository utilisateurRepository,
+			@Autowired IDtoConverter<Pret, ReservationDto> reservationConverter)
+	{
+		this.pretRepository = pretRepository;
+		this.ouvrageRepository = ouvrageRepository;
+		this.utilisateurRepository = utilisateurRepository;
+		this.reservationConverter = reservationConverter;
+	}
 	
 	@Override
 	@Transactional
@@ -63,7 +74,7 @@ public class PretServiceImpl implements PretService
 		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
 				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
 		if (requester.getRole() == Role.ROLE_ABONNE && !abonne.get().getEmail().equals(requesterName))
-			throw new NotAllowedException("Vous ne pouvez pas créer ce prêt. Vous n'etes pas l'emprunteur");
+			throw new NotAllowedException("Vous ne pouvez pas créer un pret pour un autre abonné");
 				
 		// verifier s'il y a assez d'exemplaires d'ouvrage
 		if (ouvrage.get().getNbreExemplaire() < 1) throw new NotEnoughCopiesException("Pas assez d'exemplaires pour le prêt de cet ouvrage");
@@ -97,11 +108,8 @@ public class PretServiceImpl implements PretService
 	@Transactional
 	public void retournerOuvrage(Long pretId, Long utilisateurId, String requesterName) throws EntityNotFoundException, NotAllowedException
 	{
-		Optional<Pret> pret = pretRepository.findById(pretId);
+		Optional<Pret> pret = pretRepository.findByIdAndEnPret(pretId);
 		if (!pret.isPresent()) throw new EntityNotFoundException("Le prêt n'existe pas");
-		
-		// verifier si le pret n'est pas déja retourné
-		if (pret.get().getStatut() == Statut.RETOURNE) throw new EntityNotFoundException("Le prêt n'existe pas");
 		
 		// verifier si l'abonne existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(utilisateurId);
@@ -134,7 +142,7 @@ public class PretServiceImpl implements PretService
 	@Override
 	public Pret prolonger(Long pretId, Long utilisateurId, String requesterName) throws EntityNotFoundException, DelayLoanException, NotAllowedException
 	{
-		Optional<Pret> pret = pretRepository.findById(pretId);
+		Optional<Pret> pret = pretRepository.findByIdAndEnPret(pretId);
 		if (!pret.isPresent()) throw new EntityNotFoundException("Le prêt n'existe pas");
 		
 		// verifier si le pret peut etre prolongé
@@ -143,7 +151,7 @@ public class PretServiceImpl implements PretService
 		// verifier si le pret est en retard
 		LocalDate now = LocalDate.now();
 		LocalDate finPrevu = Instant.ofEpochMilli(pret.get().getDateFinPrevu().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
-		if (finPrevu.isBefore(now)) throw new DelayLoanException("Le prêt ne peut plus être prolongé");
+		if (finPrevu.isBefore(now)) throw new DelayLoanException("Le prêt ne peut plus être prolongé car il est en retard");
 		
 		// verifier si le demandeur est l'emprunteur ou un employé
 		Utilisateur requester = utilisateurRepository.findByEmailIgnoreCase(requesterName).
@@ -206,7 +214,7 @@ public class PretServiceImpl implements PretService
 	@Override
 	@Transactional
 	public Pret reserver(Long abonneId, Long ouvrageId, String requesterName)
-			throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException
+			throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException, AvailableException
 	{
 		// verfifier si l'abonné existe
 		Optional<Utilisateur> abonne = utilisateurRepository.findById(abonneId);
@@ -223,7 +231,7 @@ public class PretServiceImpl implements PretService
 			throw new NotAllowedException("Vous ne pouvez pas réserver cet ouvrage. Vous n'etes pas l'abonné");
 				
 		// vérifier que l'ouvrage est indisponible RG8
-		if (ouvrage.get().getNbreExemplaire() > 0) throw new NotAllowedException("Cet ouvrage est disponible");
+		if (ouvrage.get().getNbreExemplaire() > 0) throw new AvailableException("Cet ouvrage est disponible");
 		
 		// recherche si un pret en cours existe deja RG3
 		Optional<Pret> pretExists = pretRepository.findByAbonneIdAndOuvrageIdAndEnPret(abonneId, ouvrageId);
@@ -239,7 +247,10 @@ public class PretServiceImpl implements PretService
 		// verifier que la file d'attente n'est pas pleine RG2
 		int nbreReservation = pretRepository.findAllReservationsByOuvrageId(ouvrageId).size();
 		int nbreMaxiReservation = ouvrage.get().getNbreExemplaireTotal() * AppSettings.getIntSetting("reservation.multiple");
-		if (nbreReservation >= nbreMaxiReservation)throw new FullWaitingQueueException("Nombre de réservation maximale atteinte pour cet ouvrage");
+		if (nbreReservation >= nbreMaxiReservation) 
+			{
+			throw new FullWaitingQueueException("Nombre de réservation maximale atteinte pour cet ouvrage");
+			}
 		
 		// initialisation du pret
 		Pret pret = new Pret(abonne.get(), ouvrage.get());
@@ -262,7 +273,7 @@ public class PretServiceImpl implements PretService
 		if (!reservation.isPresent()) throw new EntityNotFoundException("La réservation n'existe pas");
 		
 		// verifier si la réservation est toujours en cours
-		if (!reservation.get().getStatut().isReserve()) throw new EntityNotFoundException("La réservation n'existe pas");;
+		if (!reservation.get().getStatut().isReserve()) throw new EntityNotFoundException("Ce pret n'est pas une réservation");;
 		
 		// verifier si le demandeur existe
 		Optional<Utilisateur> demandeur = utilisateurRepository.findById(utilisateurId);
@@ -317,6 +328,7 @@ public class PretServiceImpl implements PretService
 						
 			Optional<Pret> prochainRetour = pretRepository.findFirstPretByOuvrageId(reservation.getOuvrage().getId());
 			
+			// TODO verifier si retourne ouvrage complet
 			ReservationDto reservationDto = reservationConverter.convertEntityToDto(reservation);
 			reservationDto.setRang(++rang);
 			if (prochainRetour.isPresent())
@@ -353,8 +365,10 @@ public class PretServiceImpl implements PretService
 				orElseThrow(() -> new NotAllowedException("Vous n'etes pas correctement authentifié"));
 		if (requester.getRole() == Role.ROLE_ABONNE && 
 				(demandeur.get().getId() != reservation.get().getAbonne().getId() ||!demandeur.get().getEmail().equals(requesterName)))
+		{
 			throw new NotAllowedException("Vous ne pouvez pas retirer cette réservation. Vous n'etes pas l'abonné");
-				
+		}
+			
 		// changer statut
 		reservation.get().setStatut(Statut.EN_COURS);
 		

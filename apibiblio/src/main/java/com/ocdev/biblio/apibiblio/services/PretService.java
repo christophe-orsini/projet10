@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import com.ocdev.biblio.apibiblio.dto.ReservationDto;
 import com.ocdev.biblio.apibiblio.entities.Pret;
 import com.ocdev.biblio.apibiblio.errors.AlreadyExistsException;
+import com.ocdev.biblio.apibiblio.errors.AvailableException;
 import com.ocdev.biblio.apibiblio.errors.DelayLoanException;
 import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
 import com.ocdev.biblio.apibiblio.errors.FullWaitingQueueException;
@@ -88,9 +89,10 @@ public interface PretService
 	 * @throws NotEnoughCopiesException levée s'il n'y a pas d'exemplaires pour cet ouvrage
 	 * @throws FullWaitingQueueException levée s'il la file de demande de réservation pour cet ouvrage est pleine
 	 * @throws NotAllowedException levée si l'ouvrage est disponible
+	 * @throws AvailableException 
 	 */
 	public Pret reserver(Long abonneId, Long ouvrageId, String requesterName) 
-			throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException;
+			throws AlreadyExistsException, EntityNotFoundException, NotEnoughCopiesException, FullWaitingQueueException, NotAllowedException, AvailableException;
 	/**
 	 * Annulation d'une réservation.
 	 * @param reservationId L'ID de la réservation

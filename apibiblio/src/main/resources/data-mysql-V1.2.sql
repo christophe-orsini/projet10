@@ -15,7 +15,7 @@ INSERT INTO theme (id, nom) VALUES
 
 INSERT INTO ouvrage (id, auteur, nbre_exemplaire, nbre_exemplaire_total, resume, titre, theme_id, annee_edition) VALUES
 (1, "Antoine de Saint-Exupéry", 1, 2, "À la suite d’une panne de moteur, un aviateur se retrouve dans le désert du Sahara. Il rencontre le petit prince qui lui demande de lui dessiner un mouton.", "Le Petit Prince", 2, 1943),
-(2, "Herman Melville", 4, 5, "Moby Dick est ce chef-d'oeuvre total que tout le monde peut lire comme le plus formidable des romans d'aventures.", "Moby Dick", 3, 1851),
+(2, "Herman Melville", 2, 3, "Moby Dick est ce chef-d'oeuvre total que tout le monde peut lire comme le plus formidable des romans d'aventures.", "Moby Dick", 3, 1851),
 (3, "J.K. Rowling", 0, 1, "Après la mort de ses parents, Harry Potter est recueilli par sa tante maternelle Pétunia et son oncle Vernon à l'âge d'un an.", "Harry Potter à l'école des sorciers", 4, 1997),
 (4, "Charles Perrault", 0, 1, "Un bûcheron et sa femme n'ont plus de quoi nourrir leurs sept garçons.", "Le Petit Poucet", 5, 1697),
 (5, "Stendhal", 0, 1, "Fils de charpentier, Julien Sorel est trop sensible et trop ambitieux pour suivre la carrière familiale dans la scierie d’une petite ville de province. ", "Le Rouge et le Noir", 6, 1830);
@@ -27,16 +27,17 @@ INSERT INTO utilisateur (id, email, nom, password, prenom, role) VALUES
 (4, "abonne2@biblio.fr", "Abonné 2", "$2a$10$HiQbf4cxgm48/wry4X7AOeKqxNtJ3CCs5H6ycoubQAnIGhjEKeSkO", NULL, "ROLE_ABONNE");
 
 INSERT INTO pret (id, date_heure_reservation, date_debut, date_fin_prevu, date_retour, statut, abonne_id, ouvrage_id, periodes, prolongations_possible) VALUES
-(1, NULL, "2021-02-13", "2021-03-13", NULL, "EN_COURS", 1, 1, 1, 1),
-(2, NULL, "2021-01-07", "2021-03-04", NULL, "PROLONGE", 2, 2, 2, 0),
-(3, NULL, "2021-01-18", "2021-03-15", NULL, "PROLONGE", 2, 3, 2, 0),
-(4, NULL, "2021-02-05", "2021-03-05", NULL, "EN_COURS", 2, 4, 1, 1),
-(5, NULL, "2021-02-04", "2021-03-04", NULL, "EN_COURS", 2, 5, 1, 1),
-(6, NULL, "2021-02-08", "2021-03-08", NULL, "EN_COURS", 1, 2, 1, 1);
+(1, NULL, "2021-03-06", "2021-04-03", NULL, "EN_COURS", 1, 1, 1, 1),
+(2, NULL, "2021-01-24", "2021-03-21", NULL, "PROLONGE", 2, 2, 2, 0),
+(3, NULL, "2021-02-08", "2021-04-05", NULL, "PROLONGE", 2, 3, 2, 0),
+(4, NULL, "2021-02-26", "2021-03-26", NULL, "EN_COURS", 2, 4, 1, 1),
+(5, NULL, "2021-02-25", "2021-03-25", NULL, "EN_COURS", 2, 5, 1, 1),
+(6, NULL, "2021-03-01", "2021-03-29", NULL, "EN_COURS", 1, 2, 1, 1);
 
 INSERT INTO pret (id, date_heure_reservation, date_heure_expiration, statut, email_envoye,  abonne_id, ouvrage_id, periodes, prolongations_possible) VALUES
-(7, "2021-02-23 09:53:00", NULL, "RESERVE", 0, 3, 3, 0, 0),
-(8, "2021-03-02 10:21:00", NULL, "RESERVE", 0, 1, 3, 0, 0),
-(9, "2021-02-27 14:17:00", "2021-03-04 08:30:00", "DISPONIBLE", 1, 1, 5, 0, 0);
+(7, "2021-03-16 09:53:00", NULL, "RESERVE", 0, 4, 3, 0, 0),
+(8, "2021-03-21 10:21:00", NULL, "RESERVE", 0, 3, 4, 0, 0),
+(9, "2021-03-23 14:17:00", NULL, "RESERVE", 0, 1, 4, 0, 0),
+(10, "2021-03-21 14:17:00", "2021-03-25 07:30:00", "DISPONIBLE", 1, 1, 5, 0, 0);
 
 

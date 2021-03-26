@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -37,9 +38,10 @@ public class ThemeController
 	@ApiOperation(value = "Ajout d'un thème", notes = "Ajout d'un nouveau thème")
 	@ApiResponses(value = {
 			@ApiResponse(code = 201, message = "Le thème est correctement créé"),
-			@ApiResponse(code = 403, message = "Authentification requise"),
-			@ApiResponse(code = 409, message = "Un thème avec le même nom existe déjà")
+			@ApiResponse(code = 401, message = "Authentification requise"),
+			@ApiResponse(code = 460, message = "Un thème avec le même nom existe déjà")
 			})
+	@ResponseStatus(value = HttpStatus.CREATED)
 	@PostMapping(value ="/themes", produces = "application/json")
 	public ResponseEntity<Theme> ajouterTheme(@Valid @RequestBody final ThemeCreateDto themeCreateDto) throws AlreadyExistsException
 	{
@@ -60,7 +62,7 @@ public class ThemeController
 	@ApiOperation(value = "Liste des thèmes", notes = "Obtenir la liste des thèmes")
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "La liste des thèmes est retournée dans le corps de la réponse"),
-			@ApiResponse(code = 403, message = "Authentification requise")
+			@ApiResponse(code = 401, message = "Authentification requise")
 			})
 	@GetMapping(value = "/themes", produces = "application/json")
 	public ResponseEntity<Page<Theme>> getThemes(@RequestParam(required = false, defaultValue = "0") int page,

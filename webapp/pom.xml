@@ -12,7 +12,7 @@
 	<artifactId>webapp</artifactId>
 	<packaging>war</packaging>
 
-	<name>webapp Bbiblio</name>
+	<name>webapp Biblio</name>
 
 	<dependencies>
 		<!-- ===== Modules ===== -->

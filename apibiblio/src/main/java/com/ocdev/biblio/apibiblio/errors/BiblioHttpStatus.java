@@ -24,6 +24,10 @@ public enum BiblioHttpStatus
 	 */
 	BIBLIO_NO_MORE (463, "No more place to add items for this ressource"),
 	/**
+	 * Ressource disponible. Action impossible.
+	 */
+	BIBLIO_AVAILABLE (464, "No more place to add items for this ressource"),
+	/**
 	 * Une action n'est pas permise à cause des règles de gestion.
 	 */
 	BIBLIO_NOT_ALLOWED (469, "Action not allowed");

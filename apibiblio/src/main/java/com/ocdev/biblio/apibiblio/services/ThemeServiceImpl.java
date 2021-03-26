@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import com.ocdev.biblio.apibiblio.assemblers.ThemeCreateDtoConverter;
+import com.ocdev.biblio.apibiblio.assemblers.IDtoConverter;
 import com.ocdev.biblio.apibiblio.dao.ThemeRepository;
 import com.ocdev.biblio.apibiblio.dto.ThemeCreateDto;
 import com.ocdev.biblio.apibiblio.entities.Theme;
@@ -15,21 +15,24 @@ import com.ocdev.biblio.apibiblio.errors.EntityNotFoundException;
 @Service
 public class ThemeServiceImpl implements ThemeService
 {
-	@Autowired ThemeRepository themeRepository;
-	@Autowired ThemeCreateDtoConverter themeConverter;
+	private ThemeRepository themeRepository;
+	private IDtoConverter<Theme, ThemeCreateDto> themeCreateConverter;
+	
+	public ThemeServiceImpl(
+			@Autowired ThemeRepository themeRepository,
+			@Autowired IDtoConverter<Theme, ThemeCreateDto> themeCreateConverter)
+	{
+		this.themeRepository = themeRepository;
+		this.themeCreateConverter = themeCreateConverter;
+	}
 	
 	@Override
 	public Theme creer(ThemeCreateDto themeCreateDto) throws AlreadyExistsException
 	{
 		Optional<Theme> themeExists = themeRepository.findByNomIgnoreCase(themeCreateDto.getNom());
-		if (themeExists.isPresent())
-		{
-			// un theme avec ce nom existe déjà
-			// log
-			throw new AlreadyExistsException("Un thème avec le même nom existe déjà");
-		}
+		if (themeExists.isPresent()) throw new AlreadyExistsException("Un thème avec le même nom existe déjà");
 		
-		Theme theme = themeConverter.convertDtoToEntity(themeCreateDto);
+		Theme theme = themeCreateConverter.convertDtoToEntity(themeCreateDto);
 		
 		// log
 		return themeRepository.save(theme);

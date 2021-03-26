@@ -85,6 +85,15 @@ class ErrorHandlingControllerAdvice
 		return ResponseEntity.status(status.getCode()).body(error);
 	}
 	
+	@ExceptionHandler(AvailableException.class)
+	@ResponseBody
+	ResponseEntity<ErrorMessage> onAvailableException(AvailableException e)
+	{
+		BiblioHttpStatus status = BiblioHttpStatus.BIBLIO_AVAILABLE;
+		ErrorMessage error = new ErrorMessage(status.getCode(), status.getName(), e.getMessage());
+		return ResponseEntity.status(status.getCode()).body(error);
+	}
+	
 	@ExceptionHandler(EntityNotFoundException.class)
 	@ResponseBody
 	ResponseEntity<ErrorMessage> onEntityNotFoundException(EntityNotFoundException e)

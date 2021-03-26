@@ -33,6 +33,9 @@ public interface PretRepository extends JpaRepository<Pret, Long>
 	
 	Collection<Pret> findByDateFinPrevuLessThan(Date dateMaxi);
 	
+	@Query(value = "SELECT p FROM Pret p WHERE id = ?1 AND (statut = 'EN_COURS' OR statut = 'PROLONGE' OR statut = 'RETARD')")
+	Optional<Pret> findByIdAndEnPret(Long pretId);
+	
 	@Query(value = "SELECT p FROM Pret p WHERE ouvrage_id = ?1 AND (statut = 'RESERVE' OR statut = 'DISPONIBLE') ORDER BY date_heure_reservation")
 	Collection<Pret> findAllReservationsByOuvrageId(Long ouvrageId);
 

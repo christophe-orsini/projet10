@@ -21,12 +21,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception
     {
-    	httpSecurity.csrf().disable();//Pour ne plus utiliser les sessions
+    	httpSecurity.csrf().disable(); //Pour ne plus utiliser les sessions
 		httpSecurity.headers().frameOptions().disable();
 		httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//Pour ne plus utiliser les sessions
 		httpSecurity.authorizeRequests()
-		.antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/**", "/webjars/**", "/swagger-ui.html").permitAll();
-		httpSecurity.authorizeRequests().antMatchers("/api/v1/utilisateurs/**").permitAll();
+		.antMatchers(
+				"/v2/api-docs", 
+				"/configuration/ui", 
+				"/swagger-resources/**", 
+				"/configuration/**",
+				"/webjars/**", 
+				"/swagger-ui.html",
+				"/swagger-ui/**",
+				"/api/v1/utilisateurs/**"
+				).permitAll();
 		httpSecurity.authorizeRequests().anyRequest().authenticated();
 		httpSecurity.httpBasic().authenticationEntryPoint(apiBiblioAuthenticationEntryPoint);
 		httpSecurity.formLogin().disable();
