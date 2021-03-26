@@ -1,9 +1,9 @@
 ﻿# BIBLIOTHEQUES DE BOUQUINVILLE
 
-## Project N°7 Gestion du SI des bibliothèques de Bouquinville
+## Project N°10 Gestion du SI des bibliothèques de Bouquinville
 
 * Développeur : Christophe ORSINI
-* Version 1.1.7
+* Version 1.2.7
 
 ---
 ### Prérequis
@@ -14,19 +14,19 @@
 Le serveur MySQL doit être en fonction et les ports 8080 et 8084 doivent être libres
 
 ### Chargement
-Clonez le dépôt à cette adresse [https://github.com/christophe-orsini/Projet7.git](https://github.com/christophe-orsini/Projet7.git)
+Clonez le dépôt à cette adresse [https://github.com/christophe-orsini/Projet10.git](https://github.com/christophe-orsini/Projet10.git)
 
 ### Deploiement, Installation et Exécution
 1. **Mettre le serveur MySQL en fonction**  
 L'application est configurée pour accéder au serveur MySQL avec le login `root` et sans password  
-Vous pouvez changer ces infos dans le fichier `<dossier de clonage>/apibiblio/src/main/ressources/application-prod.properties`  
+Vous pouvez changer ces infos dans le fichier `<dossier de clonage>/apibiblio/src/main/ressources/application.properties`  
 rubriques `spring.datasource.username` et `spring.datasource.password` 
 2. **Installer l'application**  
     - Placez vous dans le dossier où vous avez cloné le dépôt  
     - Tapez la commande `install` si vous êtes en mode console ou cliquez sur `install.bat`
     **N'utilisez pas encore l'application**
-3. Importer dans votre serveur MySQL le script `create-database.sql` pour créer la base de données et les tables
-4. Importer dans votre serveur MySQL le script `data-mysql.sql` pour charger les données de démonstration dans la base
+3. Importer dans votre serveur MySQL le script `create-database-V1.2.sql` pour créer la base de données et les tables
+4. Importer dans votre serveur MySQL le script `data-mysql-V1.2.sql` pour charger les données de démonstration dans la base
 5. Démarrez l'application pour exécuter les différents modules 
     - Tapez la commande `run` si vous êtes en mode console ou cliquez sur `run.bat` pour démarrer le serveur  
 6. Entrer l'adresse `http://<ip_hote>:8084` (ip_hote = adresse IP ou nom de la machine dans laquelle l'application est installée) dans votre navigateur WEB préféré pour vous rendre sur le site WEB  
@@ -36,9 +36,10 @@ rubriques `spring.datasource.username` et `spring.datasource.password`
 L'application est prète à fonctionner avec l'utilisateur :
 - `abonne@biblio.fr` mot de passe `abonne` pour le rôle d'utilisateur connecté
 
-### Mise à jour pour la version 1.1.7
-Pour mettre à jour l'application, exécuter les étapes 2, 5 et 6 ci-dessus  
-> L'application doit être arrêtée avant la mise à jour
+### Mise à jour de la version 1.0.x vers la version 1.2.7
+1. **Arrêter l'application**  
+2. Importer dans votre serveur MySQL le script `update-database-V1.2.sql` pour modifier les tables  
+3. Reprendre à l'étape 4 ci-dessus
 
 ### Nettoyage
 Si necessaire, vous pouvez supprimer les données de démonstration en exécutant le script `clean-datas.sql` et la base de données sera entièrement vidées.  
